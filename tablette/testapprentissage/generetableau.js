@@ -1,15 +1,58 @@
 document.rootElement.addEventListener("SVGLoad", createMap, false);
 
-function symbolecircle(x,y,width,color)
+function createSymbole(x,y,width,s)
 {
-  circle = document.createElementNS(svgns, "circle");
-  circle.setAttributeNS(null, "cx", x+width/2);
-  circle.setAttributeNS(null, "cy", y+width/2);
-  circle.setAttributeNS(null, "r", width/3);
-  circle.setAttributeNS(null, "style", "fill:"+color);
-  return circle;
-}
+  x = x*width;
+  y = y*width;
+  switch (s)
+  {
+    case "C":
+      circle = document.createElementNS(svgns, "circle");
+      circle.setAttributeNS(null, "cx", x+width/2.);
+      circle.setAttributeNS(null, "cy", y+width/2.);
+      circle.setAttributeNS(null, "r", width/3.);
+      return circle;
+    case "R":
+      rect = document.createElementNS(svgns, "rect");
+      rect.setAttributeNS(null, "x", x+width/6.);
+      rect.setAttributeNS(null, "y", y+width/6.);
+      rect.setAttributeNS(null, "width", width*2./3.);
+      rect.setAttributeNS(null, "height", width*2./3.);
+      return rect;
+// triangle
+    case "T":
+      radius = width * .4;
+      tri = document.createElementNS(svgns, "polygon");
+      points = "";
 
+      for (var i=0; i<3; i++)
+      {
+        dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
+        dy = y+width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
+        points = points + dx + "," + dy + " ";
+      }
+
+      tri.setAttributeNS(null, "points", points);
+      return tri;
+//star
+    case "E":
+      radius = width * .4;
+      tri = document.createElementNS(svgns, "polygon");
+      points = "";
+
+      for (var i=0; i<5; i++)
+      {
+        dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
+        dy = y+width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
+        points = points + dx + "," + dy + " ";
+      }
+
+      tri.setAttributeNS(null, "points", points);
+      return tri;
+    default:
+      return undefined;
+  }
+}
 
 function createMap()
 {
@@ -38,12 +81,11 @@ function createMap()
       if (background[i][j] in mapsymbcolor)
         color = mapsymbcolor[background[i][j]];
 
-      switch(symb[i][j])
+      symbole = createSymbole(i,j,40,symb[i][j]);
+      if (symbole !== undefined)
       {
-        case "C":
-          circle = symbolecircle(40*i,40*j,40, color);
-          document.rootElement.appendChild(circle);
-          break;
+        symbole.setAttributeNS(null, "style", "fill:"+color);
+        document.rootElement.appendChild(symbole);
       }
     }
   }
