@@ -6,13 +6,13 @@ function createSymbole(x,y,width,s)
   y = y*width;
   switch (s)
   {
-    case "C":
+    case "circle":
       circle = document.createElementNS(svgns, "circle");
       circle.setAttributeNS(null, "cx", x+width/2.);
       circle.setAttributeNS(null, "cy", y+width/2.);
       circle.setAttributeNS(null, "r", width/3.);
       return circle;
-    case "R":
+    case "square":
       rect = document.createElementNS(svgns, "rect");
       rect.setAttributeNS(null, "x", x+width/6.);
       rect.setAttributeNS(null, "y", y+width/6.);
@@ -20,7 +20,7 @@ function createSymbole(x,y,width,s)
       rect.setAttributeNS(null, "height", width*2./3.);
       return rect;
 // triangle
-    case "T":
+    case "triangle":
       radius = width * .4;
       tri = document.createElementNS(svgns, "polygon");
       points = "";
@@ -35,7 +35,7 @@ function createSymbole(x,y,width,s)
       tri.setAttributeNS(null, "points", points);
       return tri;
 //star
-    case "E":
+    case "star":
       radius = width * .4;
       tri = document.createElementNS(svgns, "polygon");
       points = "";
@@ -61,8 +61,8 @@ function createMap()
     for (var j=0; j<12; j++)
     {
       tile = document.createElementNS(svgns, "rect");
-      tile.setAttributeNS(null, "x", 40*i);
-      tile.setAttributeNS(null, "y", 40*j);
+      tile.setAttributeNS(null, "x", 40*j);
+      tile.setAttributeNS(null, "y", 40*i);
       tile.setAttributeNS(null, "width", 40);
       tile.setAttributeNS(null, "height", 40);
       color = mapcolordefault;
@@ -81,11 +81,14 @@ function createMap()
       if (background[i][j] in mapsymbcolor)
         color = mapsymbcolor[background[i][j]];
 
-      symbole = createSymbole(i,j,40,symb[i][j]);
-      if (symbole !== undefined)
+      if (symb[i][j] in mapsymb)
       {
-        symbole.setAttributeNS(null, "style", "fill:"+color);
-        document.rootElement.appendChild(symbole);
+        symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
+        if (symbole !== undefined)
+        {
+          symbole.setAttributeNS(null, "style", "fill:"+color);
+          document.rootElement.appendChild(symbole);
+        }
       }
     }
   }
