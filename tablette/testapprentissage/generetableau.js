@@ -1,15 +1,15 @@
 var map = [
 ["white", "red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white"],
-["white", "red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white"],
-["white", "red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white"],
-["white", "red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white"],
-["red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white"],
-["red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white"],
-["red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white"],
-["red", "red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white"],
-["red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white", "red"],
-["red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white", "red"],
-["red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white", "red"],
+["white", "red", "red", "white", "blue", "blue", "blue", "blue", "white", "red", "red", "white"],
+["white", "red", "blue", "blue", "white", "red", "red", "white", "blue", "blue", "red", "white"],
+["white", "red", "blue", "white", "white", "red", "red", "white", "white", "blue", "red", "white"],
+["red", "blue", "white", "white", "blue", "red", "white", "blue", "red", "red", "blue", "white"],
+["red", "blue", "white", "white", "red", "red", "white", "white", "blue", "red", "blue", "white"],
+["red", "blue", "white", "white", "red", "red", "white", "white", "blue", "red", "blue", "white"],
+["red", "blue", "white", "white", "blue", "red", "white", "blue", "red", "red", "blue", "white"],
+["red", "white", "blue", "red", "red", "white", "white", "red", "red", "blue", "white", "red"],
+["red", "white", "blue", "blue", "red", "white", "white", "red", "blue", "blue", "white", "red"],
+["red", "white", "white", "red", "blue", "blue", "blue", "blue", "red", "white", "white", "red"],
 ["red", "white", "white", "red", "red", "white", "white", "red", "red", "white", "white", "red"]];
 
 document.rootElement.addEventListener('SVGLoad', createMap, false);
