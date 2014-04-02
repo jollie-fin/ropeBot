@@ -3,6 +3,7 @@
 <!-- merci svground.fr -->
 <svg width="480px" height="480px" xml:lang="fr" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <title>Mon premier document SVG !</title>
+<script xlink:href="data.js"/>
 <script xlink:href="generetableau.js"/>
 <!--<rect x="0" y="0" width="40" height="40" style="fill:red;stroke:black;stroke-width:1px;"/>
 <circle cx="20" cy="20" r="18" style="fill:white;"/>-->
