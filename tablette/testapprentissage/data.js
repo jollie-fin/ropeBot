@@ -1,35 +1,35 @@
 const svgns = "http://www.w3.org/2000/svg";
 
 var background = [
-["W", "R", "R", "W", "W", "R", "R", "W", "W", "R", "R", "W"],
-["W", "R", "R", "W", "B", "B", "B", "B", "W", "R", "R", "W"],
-["W", "R", "B", "B", "W", "R", "R", "W", "B", "B", "R", "W"],
-["W", "R", "B", "W", "W", "R", "R", "W", "W", "B", "R", "W"],
-["R", "B", "W", "W", "B", "R", "W", "B", "R", "R", "B", "W"],
-["R", "B", "W", "W", "R", "R", "W", "W", "B", "R", "B", "W"],
-["R", "B", "W", "W", "R", "R", "W", "W", "B", "R", "B", "W"],
-["R", "B", "W", "W", "B", "R", "W", "B", "R", "R", "B", "W"],
-["R", "W", "B", "R", "R", "W", "W", "R", "R", "B", "W", "R"],
-["R", "W", "B", "B", "R", "W", "W", "R", "B", "B", "W", "R"],
-["R", "W", "W", "R", "B", "B", "B", "B", "R", "W", "W", "R"],
-["R", "W", "W", "R", "R", "W", "W", "R", "R", "W", "W", "R"]];
+["Cyan", "Grey", "Purple", "Grey", "Black", "Grey", "Black", "Grey", "Pink", "Grey", "Purple", "Grey"],
+["Yellow", "Grey", "Grey", "Grey", "Black", "Red", "Black", "Black", "Black", "Black", "Grey", "Black"],
+["Black", "Red", "Yellow", "Grey", "Red", "Grey", "Grey", "Purple", "Black", "Red", "Blue", "Grey"],
+["Grey", "Grey", "Red", "Black", "Black", "Black", "Green", "Purple", "Pink", "Pink", "Grey", "Black"],
+["Purple", "Grey", "Grey", "Red", "Grey", "Black", "Black", "Grey", "Grey", "Grey", "Grey", "Purple"],
+["Black", "Purple", "Grey", "Purple", "Red", "Red", "Black", "Black", "Grey", "Purple", "Red", "Black"],
+["Black", "Red", "Black", "Grey", "Grey", "Red", "Black", "Black", "Black", "Red", "Purple", "Purple"],
+["Black", "Black", "Green", "Grey", "Grey", "Red", "Grey", "Grey", "Black", "Black", "Yellow", "Black"],
+["Red", "Grey", "Black", "Purple", "Yellow", "Red", "Grey", "Grey", "Purple", "Black", "Black", "Grey"],
+["Pink", "Black", "Grey", "Pink", "Grey", "Grey", "Grey", "Red", "Green", "Purple", "Black", "Black"],
+["Grey", "Black", "Purple", "Purple", "Grey", "Black", "Orange", "Pink", "Grey", "Black", "Grey", "Red"],
+["Grey", "Grey", "Red", "Grey", "Purple", "Grey", "Black", "Grey", "Purple", "Purple", "Black", "Cyan"]];
 
 var symb = [
-[" ", "C", " ", "R", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", "T", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", "R", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", "S", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "],
-[" ", "C", " ", " ", " ", "C", " ", " ", " ", "C", " ", " "]];
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", "T", " ", " ", " ", " ", " ", " ", " ", " ", "T", " "],
+[" ", " ", " ", " ", "C", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", "C", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", "S", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "T", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
-var mapcolor = {"R" : "rgb(255,0,0)", "W" : "rgb(255,255,255)", "B" : "rgb(0,0,255)"};
-var mapsymbcolor = {"R" : "rgb(255,255,255)", "W" : "rgb(0,0,0)", "B" : "rgb(255,255,255)"};
+var mapcolor = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
+var mapsymbcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
 var mapsymb = {"C" : "circle", "R" : "square", "T" : "triangle", "S" : "star"};
 
 var mapcolordefault = "rgb(0,0,255)";
