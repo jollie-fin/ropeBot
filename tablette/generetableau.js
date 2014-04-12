@@ -74,6 +74,7 @@ function createNale(x, y, d)
   }
 
   tri.setAttributeNS(null, "points", points);
+  tri.setAttributeNS(null, "id", "nale");
 
   tri.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
   return tri;
@@ -112,7 +113,8 @@ function createMap()
         symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
         if (symbole !== undefined)
         {
-          symbole.setAttributeNS(null, "style", "fill:"+color);
+//          symbole.setAttributeNS(null, "style", "fill:"+color);
+          symbole.setAttributeNS(null, "style", "fill:black");
           document.rootElement.appendChild(symbole);
         }
       }
