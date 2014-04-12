@@ -5,4 +5,5 @@
 <title>Mon premier document SVG !</title>
 <script xlink:href="data.js"/>
 <script xlink:href="generetableau.js"/>
+<!-- <script xlink:href="simulator.js"/>-->
 </svg>

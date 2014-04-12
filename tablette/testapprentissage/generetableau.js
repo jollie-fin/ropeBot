@@ -54,6 +54,31 @@ function createSymbole(x,y,width,s)
   }
 }
 
+function createNale(x, y, d)
+{
+  tri = document.createElementNS(svgns, "polygon");
+  points = "";
+
+  width = 40.;
+  radius = 10.;
+  
+  dir = 0;
+  if (d in mapdirection)
+  dir = mapdirection[d];
+
+  for (var i=0; i<3; i++)
+  {
+    dx = x*width+width/2.+radius*Math.cos(Math.PI*(-1./2.-1./2.*dir+2./3.*i));
+    dy = y*width+width/2.+radius*Math.sin(Math.PI*(-1./2.-1./2.*dir+2./3.*i))+radius*0.2;
+    points = points + dx + "," + dy + " ";
+  }
+
+  tri.setAttributeNS(null, "points", points);
+
+  tri.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
+  return tri;
+}
+
 function createMap()
 {
   for (var i=0; i<12; i++)
@@ -72,6 +97,7 @@ function createMap()
       document.rootElement.appendChild(tile);
     }
   }
+
 
   for (var i=0; i<12; i++)
   {
@@ -92,5 +118,7 @@ function createMap()
       }
     }
   }
+  document.rootElement.appendChild(createNale(2,2,"up"));
 }
+
 
