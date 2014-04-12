@@ -1,19 +1,19 @@
-document.rootElement.addEventListener("SVGLoad", createMap, false);
+document.rootElement.addEventListener("SVGLoad", init, false);
 
 function createSymbole(x,y,width,s)
 {
-  x = x*width;
-  y = y*width;
+  var x = x*width;
+  var y = y*width;
   switch (s)
   {
     case "circle":
-      circle = document.createElementNS(svgns, "circle");
+      var circle = document.createElementNS(svgns, "circle");
       circle.setAttributeNS(null, "cx", x+width/2.);
       circle.setAttributeNS(null, "cy", y+width/2.);
       circle.setAttributeNS(null, "r", width/3.);
       return circle;
     case "square":
-      rect = document.createElementNS(svgns, "rect");
+      var rect = document.createElementNS(svgns, "rect");
       rect.setAttributeNS(null, "x", x+width/6.);
       rect.setAttributeNS(null, "y", y+width/6.);
       rect.setAttributeNS(null, "width", width*2./3.);
@@ -21,14 +21,14 @@ function createSymbole(x,y,width,s)
       return rect;
 // triangle
     case "triangle":
-      radius = width * .4;
-      tri = document.createElementNS(svgns, "polygon");
-      points = "";
+      var radius = width * .4;
+      var tri = document.createElementNS(svgns, "polygon");
+      var points = "";
 
       for (var i=0; i<3; i++)
       {
-        dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
-        dy = y+width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
+        var dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
+        var dy = y+width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
         points = points + dx + "," + dy + " ";
       }
 
@@ -36,14 +36,14 @@ function createSymbole(x,y,width,s)
       return tri;
 //star
     case "star":
-      radius = width * .4;
-      tri = document.createElementNS(svgns, "polygon");
-      points = "";
+      var radius = width * .4;
+      var tri = document.createElementNS(svgns, "polygon");
+      var points = "";
 
       for (var i=0; i<5; i++)
       {
-        dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
-        dy = y+width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
+        var dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
+        var dy = y+width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
         points = points + dx + "," + dy + " ";
       }
 
@@ -54,30 +54,87 @@ function createSymbole(x,y,width,s)
   }
 }
 
-function createNale(x, y, d)
+function coordNale()
 {
-  tri = document.createElementNS(svgns, "polygon");
-  points = "";
-
-  width = 40.;
-  radius = 10.;
+  var points = "";
+  var width = 40.;
+  var radius = 10.;
   
-  dir = 0;
-  if (d in mapdirection)
-  dir = mapdirection[d];
-
   for (var i=0; i<3; i++)
   {
-    dx = x*width+width/2.+radius*Math.cos(Math.PI*(-1./2.-1./2.*dir+2./3.*i));
-    dy = y*width+width/2.+radius*Math.sin(Math.PI*(-1./2.-1./2.*dir+2./3.*i))+radius*0.2;
+    dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
+    dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+2./3.*i))-radius*0.8;
     points = points + dx + "," + dy + " ";
   }
+  return points;
+}
+
+function createNale(x, y, d)
+{
+  var width = 40.;
+  var radius = 10.;
+  var tri = document.createElementNS(svgns, "polygon");
+  var points = coordNale();
 
   tri.setAttributeNS(null, "points", points);
   tri.setAttributeNS(null, "id", "nale");
 
   tri.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
-  return tri;
+
+  var dir = 0.;
+  if (d in mapdirection)
+  dir = mapdirection[d];
+
+  dir = dir * 90.;
+  var x = x * width;
+  var y = y * width;
+
+  var dir1 = dir;
+  var dir2 = dir+90.;
+  var x1 = x;
+  var x2 = x;
+  var y1 = y;
+  var y2 = y+40;
+  var offset = width/2.;
+
+
+  var group = document.createElementNS(svgns, "g");
+
+  var trans = document.createElementNS(svgns, "animateTransform");
+  trans.setAttributeNS(null, "id", "naletranslation");
+  trans.setAttributeNS(null, "attributeName", "transform");
+  trans.setAttributeNS(null, "attributeType", "XML");
+  trans.setAttributeNS(null, "type", "translate");
+  trans.setAttributeNS(null, "fill", "freeze");
+  trans.setAttributeNS(null, "from", x1+", "+y1);
+  trans.setAttributeNS(null, "to", x2+", "+y2);
+  trans.setAttributeNS(null, "begin", "indefinite");
+  trans.setAttributeNS(null, "dur", "1s");
+
+  
+  var rotate = document.createElementNS(svgns, "animateTransform");
+  rotate.setAttributeNS(null, "id", "nalerotation");
+  rotate.setAttributeNS(null, "attributeName", "transform");
+  rotate.setAttributeNS(null, "attributeType", "XML");
+  rotate.setAttributeNS(null, "fill", "freeze");
+  rotate.setAttributeNS(null, "type", "rotate");
+/*  rotate.setAttributeNS(null, "from", dir1 + ", "+(x1+offset)+", "+(y1+offset));
+  rotate.setAttributeNS(null, "to", dir2 + ", "+(x2+offset)+", "+(y2+offset));*/
+  rotate.setAttributeNS(null, "from", dir1 + ", "+(offset)+", "+(offset));
+  rotate.setAttributeNS(null, "to", dir2 + ", "+(offset)+", "+(offset));
+/*  rotate.setAttributeNS(null, "from", dir1 + ", 0,0");
+  rotate.setAttributeNS(null, "to", dir2 + ", 0,0");*/
+  rotate.setAttributeNS(null, "begin", "indefinite");
+  rotate.setAttributeNS(null, "dur", "1s");
+  tri.appendChild(rotate);
+  tri.setAttributeNS(null, "transform", "rotate("+dir1 + ", "+(offset)+", "+(offset)+")");
+
+  tri.setAttributeNS(null, "transform", "translate("+x1+ ", "+y1+")");
+  
+  group.appendChild(tri);
+  group.appendChild(trans);
+
+  return group;
 }
 
 function createMap()
@@ -86,12 +143,12 @@ function createMap()
   {
     for (var j=0; j<12; j++)
     {
-      tile = document.createElementNS(svgns, "rect");
+      var tile = document.createElementNS(svgns, "rect");
       tile.setAttributeNS(null, "x", 40*j);
       tile.setAttributeNS(null, "y", 40*i);
       tile.setAttributeNS(null, "width", 40);
       tile.setAttributeNS(null, "height", 40);
-      color = mapcolordefault;
+      var color = mapcolordefault;
       if (background[i][j] in mapcolor)
         color = mapcolor[background[i][j]];
       tile.setAttributeNS(null, "style", "fill:"+color+";stroke:black;stroke-width:1px;");
@@ -104,17 +161,16 @@ function createMap()
   {
     for (var j=0; j<12; j++)
     {
-      color = mapsymbcolordefault;
+      var color = mapsymbcolordefault;
       if (background[i][j] in mapsymbcolor)
         color = mapsymbcolor[background[i][j]];
 
       if (symb[i][j] in mapsymb)
       {
-        symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
+        var symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
         if (symbole !== undefined)
         {
-//          symbole.setAttributeNS(null, "style", "fill:"+color);
-          symbole.setAttributeNS(null, "style", "fill:black");
+          symbole.setAttributeNS(null, "style", "fill:"+color);
           document.rootElement.appendChild(symbole);
         }
       }
@@ -123,4 +179,14 @@ function createMap()
   document.rootElement.appendChild(createNale(2,2,"up"));
 }
 
+function move()
+{
+	document.getElementById("nalerotation").beginElement();
+	document.getElementById("naletranslation").beginElement();
+}
 
+function init()
+{
+  createMap();  
+  document.rootElement.addEventListener("click", move, false);
+}
