@@ -69,47 +69,99 @@ function coordNale()
   return points;
 }
 
-function createNale(x, y, d)
+function transformfromstring(x, y, d, s)
 {
+  var delta=[[0,-1],[1,0],[0,1],[-1,0]];
+  var dir = 0;
+  if (d in mapdirection)
+  dir = mapdirection[d];
+
+  var dirangle = 90 * dir;
   var width = 40.;
-  var radius = 10.;
+  var offset = width / 2.;
+
+  var rotate = "";
+  var trans = "";
+  var duration = 0;
+
+  var x = x;
+  var y = y;
+  rotateinit = "rotate(" + dirangle + "," + offset + "," + offset + ")";
+  transinit = "translate(" + (width*x) + "," + (width*y)+ ")";
+
+  rotate = " " + dirangle + "," + offset + "," + offset;
+  trans = " " + (width*x) + "," + (width*y);
+
+  for (var i = 0; i < s.length; i++)
+  {
+    switch (s[i])
+    {
+      case "A":
+        x += delta[dir][0];
+        y += delta[dir][1];
+        rotate += ";" + dirangle + "," + offset + "," + offset;
+        trans += ";" + (width*x) + "," + (width*y);
+        duration++;
+        break;
+
+      case "R":
+        x -= delta[dir][0];
+        y -= delta[dir][1];
+        rotate += ";" + dirangle + "," + offset + "," + offset;
+        trans += ";" + (width*x) + "," + (width*y);
+        duration++;
+        break;
+
+      case "D":
+        dir++;
+        if (dir == 4)
+          dir = 0;
+        dirangle += 90;
+        rotate += ";" + dirangle + "," + offset + "," + offset;
+        trans += ";" + (width*x) + "," + (width*y);
+        duration++;
+        break;
+        
+      case "G":
+        dir--;
+        if (dir == -1)
+          dir = 3;
+        dirangle -= 90;
+        rotate += ";" + dirangle + "," + offset + "," + offset;
+        trans += ";" + (width*x) + "," + (width*y);
+        duration++;
+        break;
+    }
+  }
+  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration};
+}
+
+function createNale(x, y, d, s)
+{
   var tri = document.createElementNS(svgns, "polygon");
   var points = coordNale();
+
 
   tri.setAttributeNS(null, "points", points);
   tri.setAttributeNS(null, "id", "nale");
 
   tri.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
 
-  var dir = 0.;
-  if (d in mapdirection)
-  dir = mapdirection[d];
-
-  dir = dir * 90.;
-  var x = x * width;
-  var y = y * width;
-
-  var dir1 = dir;
-  var dir2 = dir+90.;
-  var x1 = x;
-  var x2 = x;
-  var y1 = y;
-  var y2 = y+40;
-  var offset = width/2.;
-
-
   var group = document.createElementNS(svgns, "g");
 
+  t = transformfromstring(x,y,d,s);
+
+  duration = t["duration"] * 1;
+  duration = " " + duration + "s";
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
   trans.setAttributeNS(null, "attributeName", "transform");
   trans.setAttributeNS(null, "attributeType", "XML");
   trans.setAttributeNS(null, "type", "translate");
   trans.setAttributeNS(null, "fill", "freeze");
-  trans.setAttributeNS(null, "from", x1+", "+y1);
-  trans.setAttributeNS(null, "to", x2+", "+y2);
+  trans.setAttributeNS(null, "values", t["translate"]);
   trans.setAttributeNS(null, "begin", "indefinite");
-  trans.setAttributeNS(null, "dur", "1s");
+  trans.setAttributeNS(null, "dur", duration);
 
   
   var rotate = document.createElementNS(svgns, "animateTransform");
@@ -118,18 +170,13 @@ function createNale(x, y, d)
   rotate.setAttributeNS(null, "attributeType", "XML");
   rotate.setAttributeNS(null, "fill", "freeze");
   rotate.setAttributeNS(null, "type", "rotate");
-/*  rotate.setAttributeNS(null, "from", dir1 + ", "+(x1+offset)+", "+(y1+offset));
-  rotate.setAttributeNS(null, "to", dir2 + ", "+(x2+offset)+", "+(y2+offset));*/
-  rotate.setAttributeNS(null, "from", dir1 + ", "+(offset)+", "+(offset));
-  rotate.setAttributeNS(null, "to", dir2 + ", "+(offset)+", "+(offset));
-/*  rotate.setAttributeNS(null, "from", dir1 + ", 0,0");
-  rotate.setAttributeNS(null, "to", dir2 + ", 0,0");*/
+  rotate.setAttributeNS(null, "values", t["rotate"]);
   rotate.setAttributeNS(null, "begin", "indefinite");
-  rotate.setAttributeNS(null, "dur", "1s");
+  rotate.setAttributeNS(null, "dur", duration);
   tri.appendChild(rotate);
-  tri.setAttributeNS(null, "transform", "rotate("+dir1 + ", "+(offset)+", "+(offset)+")");
+  tri.setAttributeNS(null, "transform", t["rotateinit"]);
 
-  tri.setAttributeNS(null, "transform", "translate("+x1+ ", "+y1+")");
+  tri.setAttributeNS(null, "transform", t["translateinit"]);
   
   group.appendChild(tri);
   group.appendChild(trans);
@@ -176,7 +223,7 @@ function createMap()
       }
     }
   }
-  document.rootElement.appendChild(createNale(2,2,"up"));
+  document.rootElement.appendChild(createNale(2,2,"up","AAGRGAADA"));
 }
 
 function move()
