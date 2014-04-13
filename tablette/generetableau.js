@@ -61,29 +61,21 @@ function transformfromprogram(start, p)
 
   while (pc < p.length && iteration < 1000 && !stop)
   {
-    var denysymbol = false;
-    var denycolor = false;
-    var accept = (p[pc][1] == -1);
+    var accept = true;
     
     var color = background[y][x];
     var symbol = symb[y][x];
 
-    if (p[pc][2] != "" && p[pc][2][0] != "!" && color != p[pc][2])
-      denycolor = true;
+    accept = accept && (   p[pc][1] == -1
+                        || repetition[pc] < p[pc][1]);
+    accept = accept && (   p[pc][2] == ""
+                        || (   (p[pc][2][0] == "!" || color == p[pc][2])
+                            && (p[pc][2][0] != "!" || color != p[pc][2].substring(1,p[pc][2].length))));
+    accept = accept && (   p[pc][3] == ""
+                        || (   (p[pc][3][0] == "!" || symbol == p[pc][3])
+                            && (p[pc][3][0] != "!" || color != p[pc][3].substring(1,p[pc][3].length))));
 
-    if (p[pc][2] != "" && p[pc][2][0] == "!" && color == p[pc][2].substring(1,p[pc][2].length))
-      denycolor = true;
-
-    if (p[pc][3] != "" && p[pc][3][0] != "!" && symbol != p[pc][3])
-      denysymbol = true;
-
-    if (p[pc][3] != "" && p[pc][3][0] == "!" && symbol == p[pc][3].substring(1,p[pc][3].length))
-      denysymbol = true;
-
-    if (repetition[pc] < p[pc][1])
-      accept = true;
-
-    if (accept && !denysymbol && !denycolor)
+    if (accept)
     {
       repetition[pc]++;
       switch (p[pc][0][0])
@@ -104,7 +96,7 @@ function transformfromprogram(start, p)
         case "F":
         case "B":
           var coeff = (p[pc][0][0] == "F") ? 1 : -1;
-          var nb = parseInt(p[pc][0][1]);
+          var nb = parseInt(p[pc][0].substring(1,p[pc][0].length));
 
           for (i = 0; i < nb; i++)
           {
@@ -119,15 +111,17 @@ function transformfromprogram(start, p)
               break;
             }
 
-            var ground = groundAt(newx,newy);
-            switch (ground)
+            var ground = groundAt(x,y);
+            var newground = groundAt(newx,newy);
+
+            if (newground == "wall")
             {
-              case "wall":
                 iterate(x,y,dirangle,1.);
                 i = nb-1;
                 break;
-
-              case "sand":
+            }
+            if (ground == "sand")
+            {
                 if (i < nb-1)
                 {
                   i++;
@@ -138,20 +132,27 @@ function transformfromprogram(start, p)
                 else
                 {
                   iterate(x,y,dirangle,1.);
+                  break;
                 }
-                break;
-
-              case "lava":
+            }
+            else
+            {
                 x = newx;
                 y = newy;
-                stop = true;
-                break;
+                iterate(x,y,dirangle,1.);
+            }
 
-              case "space":
+            if (newground == "lava")
+            {
+              stop = true;
+              break;
+            }
+            if (newground == "space")
+            {
                 var newnewx = newx;
                 var newnewy = newy;
-                var nbcases = 0;
-                while (newnewx >= 0 && newnewx < 12 && newnewy >= 0 && newnewy < 12 && groundAt(newnewx,newnewy) == "space")
+                var nbcases = -1;
+                while (newnewx >= 0 && newnewx < 12 && newnewy >= 0 && newnewy < 12 && groundAt(newx,newy) == "space")
                 {
                   newx = newnewx;
                   newy = newnewy;
@@ -161,19 +162,14 @@ function transformfromprogram(start, p)
                 }
                 x = newx;
                 y = newy;
-                dirangle += 360.;
-//                iterate(x,y,dirangle,nbcases/2.);
-                i--;
-                break;
-  
-              default:
-                x = newx;
-                y = newy;
-                iterate(x,y,dirangle,1.);
-                break;
+                dirangle += 360.*nbcases;
+                iterate(x,y,dirangle,nbcases);
+                if (newnewx < 0 || newnewx >= 12 || newnewy < 0 || newnewy >= 12)
+                {
+                  stop = true;
+                  break;
+                }
             }
-            if (stop)
-              break;
           }
           if (stop)
             break;
@@ -233,14 +229,14 @@ function createSymbole(x,y,width,s)
   {
     case "circle":
       var circle = document.createElementNS(svgns, "circle");
-      circle.setAttributeNS(null, "cx", x+width/2.);
-      circle.setAttributeNS(null, "cy", y+width/2.);
+      circle.setAttributeNS(null, "cx", width/2.);
+      circle.setAttributeNS(null, "cy", width/2.);
       circle.setAttributeNS(null, "r", width/3.);
       return circle;
     case "square":
       var rect = document.createElementNS(svgns, "rect");
-      rect.setAttributeNS(null, "x", x+width/6.);
-      rect.setAttributeNS(null, "y", y+width/6.);
+      rect.setAttributeNS(null, "x", width/6.);
+      rect.setAttributeNS(null, "y", width/6.);
       rect.setAttributeNS(null, "width", width*2./3.);
       rect.setAttributeNS(null, "height", width*2./3.);
       return rect;
@@ -252,8 +248,8 @@ function createSymbole(x,y,width,s)
 
       for (var i=0; i<3; i++)
       {
-        var dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
-        var dy = y+width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
+        var dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
+        var dy = width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
         points = points + dx + "," + dy + " ";
       }
 
@@ -267,8 +263,8 @@ function createSymbole(x,y,width,s)
 
       for (var i=0; i<5; i++)
       {
-        var dx = x+width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
-        var dy = y+width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
+        var dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
+        var dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
         points = points + dx + "," + dy + " ";
       }
 
@@ -312,7 +308,7 @@ function createNale(start, p)
 
   t = transformfromprogram(start,p);
 
-  duration = t["duration"] * .5;
+  duration = t["duration"] * 0.2;
   duration = " " + duration + "s";
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
@@ -387,10 +383,11 @@ function createMap()
     for (var j=0; j<12; j++)
     {
       var tile = document.createElementNS(svgns, "rect");
-      tile.setAttributeNS(null, "x", 40*j);
-      tile.setAttributeNS(null, "y", 40*i);
+      tile.setAttributeNS(null, "x", "0");
+      tile.setAttributeNS(null, "y", "0");
       tile.setAttributeNS(null, "width", 40);
       tile.setAttributeNS(null, "height", 40);
+      tile.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
       var color = mapcolordefault;
       if (background[i][j] in mapcolor)
         color = mapcolor[background[i][j]];
@@ -398,6 +395,7 @@ function createMap()
       document.rootElement.appendChild(tile);
     }
   }
+
 
 
   for (var i=0; i<12; i++)
@@ -411,6 +409,7 @@ function createMap()
       if (symb[i][j] in mapsymb)
       {
         var symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
+        symbole.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
         if (symbole !== undefined)
         {
           symbole.setAttributeNS(null, "style", "fill:"+color);

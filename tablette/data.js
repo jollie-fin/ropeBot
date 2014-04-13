@@ -34,8 +34,8 @@ var symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
 //var groundlevel = {"Blue" : "L"};
-//var groundlevel = {"Black" : "A"};
-var groundlevel = {};
+var groundlevel = {"Red" : "S", "Black" : "A"};
+//var groundlevel = {};
 /*
 TL : turn left
 TR : turn right
@@ -52,15 +52,15 @@ var startingposition = {"x" : 1, "y" : 3, "d" : "up"};
 var program = [
 ["1",-1,"",""],
 ["R",-1,"","T"],
-["F1",-1,"",""],
+["F2",-1,"",""],
 ["G1",-1,"!Pink",""],
 ["2",-1,"",""],
-["F1",-1,"",""],
+["F1",-1,"!Grey",""],
 ["G2",2,"",""],
 ["R",-1,"",""],
 ["F1",-1,"",""],
 ["3",-1,"",""],
-["F1",-1,"",""],
+["F2",-1,"",""],
 ["G4",-1,"Red","C"],
 ["G3",-1,"",""],
 ["4",-1,"",""]];
