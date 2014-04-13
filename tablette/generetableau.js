@@ -107,14 +107,14 @@ function transformfromprogram(start, p)
 
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + .2;
+          keys[iteration+1] = keys[iteration] + 1.;
           pc = i;
           break;
 
         default:
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + .2;
+          keys[iteration+1] = keys[iteration] + 1.;
           pc++;
           break;
       }
@@ -137,15 +137,15 @@ function transformfromprogram(start, p)
   }
 
 
-  var pcstrans = "0,0";
+  var pctrans = "0,0";
   for (var i = 1; i < pcs.length; i++)
   {
-    pcstrans += "; 0," + pcs[i]*width;
+    pctrans += "; 0," + pcs[i]*width/2.;
   }
-  var pcstransinit = "translate(0,0)";
+  var pctransinit = "translate(0,0)";
   
 
-  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pcstrans, "pctransinit" : pcstransinit};
+  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit};
 }
 
 
@@ -222,19 +222,19 @@ function coordNale()
 function createNale(start, p)
 {
 
-  var tri = document.createElementNS(svgns, "polygon");
+  var nale = document.createElementNS(svgns, "polygon");
   var points = coordNale();
 
 
-  tri.setAttributeNS(null, "points", points);
-  tri.setAttributeNS(null, "id", "nale");
+  nale.setAttributeNS(null, "points", points);
+  nale.setAttributeNS(null, "id", "nale");
 
-  tri.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
+  nale.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
 
   var group = document.createElementNS(svgns, "g");
+  var groupnale = document.createElementNS(svgns, "g");
 
   t = transformfromprogram(start,p);
-
 
   duration = t["duration"] * 1.;
   duration = " " + duration + "s";
@@ -260,14 +260,47 @@ function createNale(start, p)
   rotate.setAttributeNS(null, "keyTimes", t["keys"]);
   rotate.setAttributeNS(null, "begin", "indefinite");
   rotate.setAttributeNS(null, "dur", duration);
-  tri.appendChild(rotate);
-  tri.setAttributeNS(null, "transform", t["rotateinit"]);
 
-  group.setAttributeNS(null, "transform", t["translateinit"]);
-  
-  group.appendChild(tri);
-  group.appendChild(trans);
+  nale.appendChild(rotate);
+  nale.setAttributeNS(null, "transform", t["rotateinit"]);
 
+  groupnale.setAttributeNS(null, "transform", t["translateinit"]);
+  groupnale.appendChild(nale);
+  groupnale.appendChild(trans);
+  group.appendChild(groupnale);
+
+  var pc = document.createElementNS(svgns, "rect");
+  pc.setAttributeNS(null, "x", "480");
+  pc.setAttributeNS(null, "y", "5");
+  pc.setAttributeNS(null, "width", "10");
+  pc.setAttributeNS(null, "height", "10");
+  pc.setAttributeNS(null, "style", "fill: green;stroke:black;stroke-width:1px;");
+  pc.setAttributeNS(null, "transform", t["pctransinit"]);
+
+  var pctrans = document.createElementNS(svgns, "animateTransform");
+  pctrans.setAttributeNS(null, "id", "nalepc");
+  pctrans.setAttributeNS(null, "attributeName", "transform");
+  pctrans.setAttributeNS(null, "attributeType", "XML");
+  pctrans.setAttributeNS(null, "type", "translate");
+  pctrans.setAttributeNS(null, "fill", "freeze");
+  pctrans.setAttributeNS(null, "values", t["pctrans"]);
+  pctrans.setAttributeNS(null, "keyTimes", t["keys"]);
+  pctrans.setAttributeNS(null, "begin", "indefinite");
+  pctrans.setAttributeNS(null, "dur", duration);
+  pctrans.setAttributeNS(null, "calcMode", "discrete");
+
+  pc.appendChild(pctrans);
+
+  group.appendChild(pc);
+  for (var i = 0; i < p.length; i++)
+  {
+    var text = document.createElementNS(svgns, "text");
+    text.setAttribute("x", "493");
+    text.setAttribute("y", "" + (19+i*20));
+    text.setAttribute("font-size", "18px");
+    text.textContent = p[i][0];
+    group.appendChild(text);
+  }
   return group;
 }
 
@@ -317,6 +350,9 @@ function move()
 {
 	document.getElementById("nalerotation").beginElement();
 	document.getElementById("naletranslation").beginElement();
+  document.getElementById("nalepc").beginElement();
+
+nalepc
 }
 
 function init()
