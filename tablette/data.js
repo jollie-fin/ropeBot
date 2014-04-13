@@ -33,7 +33,9 @@ var symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "T", " "],
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
-var ground = {};
+//var groundlevel = {"Blue" : "L"};
+var groundlevel = {"Blue" : "W"};
+//var groundlevel = {};
 /*
 TL : turn left
 TR : turn right
@@ -60,8 +62,7 @@ var program = [
 ["F1",-1,"",""],
 ["G4",-1,"Red","C"],
 ["G3",-1,"",""],
-["4",-1,"",""],
-[" ",-1,"",""]];
+["4",-1,"",""]];
 
 var mapcolor = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
 var mapsymbcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};

@@ -33,8 +33,8 @@ function transformfromprogram(start, p)
   rotate = " " + dirangle + "," + offset + "," + offset;
   trans = " " + (width*x) + "," + (width*y);
   keys[iteration] = 0.;
-
-  while (pc < p.length && iteration < 1000)
+  var stop = false;
+  while (pc < p.length && iteration < 1000 && !stop)
   {
     var denysymbol = false;
     var denycolor = false;
@@ -60,61 +60,70 @@ function transformfromprogram(start, p)
 
     if (accept && !denysymbol && !denycolor)
     {
-      pcs[iteration] = pc;
       repetition[pc]++;
       switch (p[pc][0][0])
       {
         case "L":
-          dir--;
-          if (dir == -1)
-            dir = 3;
-          dirangle -= 90;
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + 1.;
-          pc++;
-          break;
-
         case "R":
-          dir++;
+          var coeff = (p[pc][0][0] == "R") ? 1 : -1;
+          dir+=coeff;
           if (dir == 4)
             dir = 0;
-          dirangle += 90;
+          if (dir == -1)
+            dir = 3;
+          dirangle += coeff*90;
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
+          pcs[iteration] = pc;
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
           break;
 
         case "F":
-          var nb = parseInt(p[pc][0][1]);
-          x += nb*delta[dir][0];
-          y += nb*delta[dir][1];
-          if (x < 0 || x >= 12 || y < 0 || y >= 12)
-          {
-            pc = p.length;
-            break;
-          }
-
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + 1.;
-          pc++;
-          break;
-
         case "B":
+          var coeff = (p[pc][0][0] == "F") ? 1 : -1;
           var nb = parseInt(p[pc][0][1]);
-          x -= nb*delta[dir][0];
-          y -= nb*delta[dir][1];
-          if (x < 0 || x >= 12 || y < 0 || y >= 12)
+          var newx = x+coeff*nb*delta[dir][0];
+          var newy = y+coeff*nb*delta[dir][1];
+          if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
           {
-            pc = p.length;
+            stop = true;
             break;
+          }
+          var ground = "";
+          var newcolor = background[newy][newx];
+          var newsymbol = symb[newy][newx];
+          if (newcolor in groundlevel)
+            ground = groundlevel[newcolor];
+          if (newsymbol in groundlevel)
+            ground = groundlevel[newsymbol];
+          if (ground in mapground)
+          {
+            ground = mapground[ground];
+            if (ground == "wall")
+            {
+            }
+            else if (ground == "lava")
+            {
+              stop = true;
+              break;
+            }
+            else
+            {
+              x = newx;
+              y = newy;
+            }
+          }
+          else
+          {
+            x = newx;
+            y = newy;
           }
 
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + .4;
+          pcs[iteration] = pc;
+          keys[iteration+1] = keys[iteration] + 1.;
           pc++;
           break;
 
@@ -127,13 +136,15 @@ function transformfromprogram(start, p)
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + .4;
+          pcs[iteration] = pc;
           pc = i;
           break;
 
         default:
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + 1.;
+          keys[iteration+1] = keys[iteration] + .4;
+          pcs[iteration] = pc;
           pc++;
           break;
       }
@@ -144,7 +155,11 @@ function transformfromprogram(start, p)
       pc++;
     }
   }
-  pcs[iteration] = pc;
+  if (pc != p.length)
+    pcs[iteration-1] = pc;
+  else
+    pcs[iteration] = pc;
+
   var keysstring = "0.";
 
   var duration = keys[keys.length - 1];
@@ -161,7 +176,6 @@ function transformfromprogram(start, p)
     pctrans += "; 0," + pcs[i]*width/2.;
   }
   var pctransinit = "translate(0,0)";
-  
 
   return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit};
 }
