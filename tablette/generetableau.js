@@ -9,9 +9,9 @@ function transformfromprogram(start, p)
   var d = start["d"];
 
   var delta=[[0,-1],[1,0],[0,1],[-1,0]];
-  var dir = 0;
+  var dir = 1;
   if (d in mapdirection)
-  dir = mapdirection[d];
+    dir = mapdirection[d];
 
   var dirangle = 90 * dir;
   var width = 40.;
@@ -24,6 +24,30 @@ function transformfromprogram(start, p)
   var iteration = 0;
   var pc = 0;
 
+  var iterate = function(x,y,dirangle,time)
+  {
+    rotate += ";" + dirangle + "," + offset + "," + offset;
+    trans += ";" + (width*x) + "," + (width*y);
+    pcs[iteration] = pc;
+    keys[iteration+1] = keys[iteration] + time;
+    iteration++;
+  }
+
+  var groundAt = function(x,y)
+  {
+    var color = background[y][x];
+    var symbol = symb[y][x];
+    var ground = "";
+    if (color in groundlevel)
+      ground = groundlevel[color];
+    if (symbol in groundlevel)
+      ground = groundlevel[symbol];
+    if (ground in mapground)
+      return mapground[ground];
+    else
+      return "";
+  }
+
   for (var i = 0; i < p.length; i++)
     repetition[i] = 0;
 
@@ -34,6 +58,7 @@ function transformfromprogram(start, p)
   trans = " " + (width*x) + "," + (width*y);
   keys[iteration] = 0.;
   var stop = false;
+
   while (pc < p.length && iteration < 1000 && !stop)
   {
     var denysymbol = false;
@@ -72,10 +97,7 @@ function transformfromprogram(start, p)
           if (dir == -1)
             dir = 3;
           dirangle += coeff*90;
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          pcs[iteration] = pc;
-          keys[iteration+1] = keys[iteration] + 1.;
+          iterate(x,y,dirangle,1.);
           pc++;
           break;
 
@@ -83,47 +105,79 @@ function transformfromprogram(start, p)
         case "B":
           var coeff = (p[pc][0][0] == "F") ? 1 : -1;
           var nb = parseInt(p[pc][0][1]);
-          var newx = x+coeff*nb*delta[dir][0];
-          var newy = y+coeff*nb*delta[dir][1];
-          if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+
+          for (i = 0; i < nb; i++)
           {
-            stop = true;
-            break;
-          }
-          var ground = "";
-          var newcolor = background[newy][newx];
-          var newsymbol = symb[newy][newx];
-          if (newcolor in groundlevel)
-            ground = groundlevel[newcolor];
-          if (newsymbol in groundlevel)
-            ground = groundlevel[newsymbol];
-          if (ground in mapground)
-          {
-            ground = mapground[ground];
-            if (ground == "wall")
-            {
-            }
-            else if (ground == "lava")
-            {
-              stop = true;
-              break;
-            }
-            else
+            var newx = x+coeff*delta[dir][0];
+            var newy = y+coeff*delta[dir][1];
+
+            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
             {
               x = newx;
               y = newy;
+              stop = true;
+              break;
             }
-          }
-          else
-          {
-            x = newx;
-            y = newy;
-          }
 
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          pcs[iteration] = pc;
-          keys[iteration+1] = keys[iteration] + 1.;
+            var ground = groundAt(newx,newy);
+            switch (ground)
+            {
+              case "wall":
+                iterate(x,y,dirangle,1.);
+                i = nb-1;
+                break;
+
+              case "sand":
+                if (i < nb-1)
+                {
+                  i++;
+                  x = newx;
+                  y = newy;
+                  iterate(x,y,dirangle,2.);
+                }
+                else
+                {
+                  iterate(x,y,dirangle,1.);
+                }
+                break;
+
+              case "lava":
+                x = newx;
+                y = newy;
+                stop = true;
+                break;
+
+              case "space":
+                var newnewx = newx;
+                var newnewy = newy;
+                var nbcases = 0;
+                while (newnewx >= 0 && newnewx < 12 && newnewy >= 0 && newnewy < 12 && groundAt(newnewx,newnewy) == "space")
+                {
+                  newx = newnewx;
+                  newy = newnewy;
+                  newnewx = newx + coeff*delta[dir][0];
+                  newnewy = newy + coeff*delta[dir][1];
+                  nbcases++;
+                }
+                x = newx;
+                y = newy;
+                dirangle += 360.;
+//                iterate(x,y,dirangle,nbcases/2.);
+                i--;
+                break;
+  
+              default:
+                x = newx;
+                y = newy;
+                iterate(x,y,dirangle,1.);
+                break;
+            }
+            if (stop)
+              break;
+          }
+          if (stop)
+            break;
+
           pc++;
           break;
 
@@ -133,32 +187,22 @@ function transformfromprogram(start, p)
           while (i < p.length && p[i][0] != label)
             i++;
 
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + .4;
-          pcs[iteration] = pc;
+          iterate(x,y,dirangle,.4);
           pc = i;
           break;
 
         default:
-          rotate += ";" + dirangle + "," + offset + "," + offset;
-          trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + .4;
-          pcs[iteration] = pc;
+          iterate(x,y,dirangle,.4);
           pc++;
           break;
       }
-      iteration++;
     }
     else
     {
       pc++;
     }
   }
-  if (pc != p.length)
-    pcs[iteration-1] = pc;
-  else
-    pcs[iteration] = pc;
+  pcs[iteration] = pc;
 
   var keysstring = "0.";
 
@@ -268,7 +312,7 @@ function createNale(start, p)
 
   t = transformfromprogram(start,p);
 
-  duration = t["duration"] * .25;
+  duration = t["duration"] * .5;
   duration = " " + duration + "s";
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
