@@ -34,23 +34,33 @@ function transformfromprogram(start, p)
   trans = " " + (width*x) + "," + (width*y);
   keys[iteration] = 0.;
 
-  pcs[iteration] = pc;
-  while (pc < p.length && iteration < 100)
+  while (pc < p.length && iteration < 1000)
   {
-    var valide = true;
+    var denysymbol = false;
+    var denycolor = false;
+    var accept = (p[pc][1] == -1);
+    
     var color = background[y][x];
+    var symbol = symb[y][x];
 
-    if (valide && p[pc][2] != "" && p[pc][2][0] != "!" && color != p[pc][2])
-      valide = false;
+    if (p[pc][2] != "" && p[pc][2][0] != "!" && color != p[pc][2])
+      denycolor = true;
 
-    if (valide && p[pc][2] != "" && p[pc][2][0] == "!" && (color == p[pc][2].substring(1,p[pc][2].length)))
-      valide = false;
+    if (p[pc][2] != "" && p[pc][2][0] == "!" && color == p[pc][2].substring(1,p[pc][2].length))
+      denycolor = true;
 
-    if (valide && p[pc][1] != -1 && repetition[pc] >= p[pc][1])
-      valide = false;
+    if (p[pc][3] != "" && p[pc][3][0] != "!" && symbol != p[pc][3])
+      denysymbol = true;
 
-    if (valide)
+    if (p[pc][3] != "" && p[pc][3][0] == "!" && symbol == p[pc][3].substring(1,p[pc][3].length))
+      denysymbol = true;
+
+    if (repetition[pc] < p[pc][1])
+      accept = true;
+
+    if (accept && !denysymbol && !denycolor)
     {
+      pcs[iteration] = pc;
       repetition[pc]++;
       switch (p[pc][0][0])
       {
@@ -63,7 +73,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
-          pcs[iteration+1] = pc;
           break;
 
         case "R":
@@ -75,7 +84,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
-          pcs[iteration+1] = pc;
           break;
 
         case "F":
@@ -92,7 +100,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
-          pcs[iteration+1] = pc;
           break;
 
         case "B":
@@ -109,7 +116,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + .4;
           pc++;
-          pcs[iteration+1] = pc;
           break;
 
         case "G":
@@ -122,7 +128,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + .4;
           pc = i;
-          pcs[iteration+1] = pc;
           break;
 
         default:
@@ -130,7 +135,6 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
-          pcs[iteration+1] = pc;
           break;
       }
       iteration++;
@@ -140,6 +144,7 @@ function transformfromprogram(start, p)
       pc++;
     }
   }
+  pcs[iteration] = pc;
   var keysstring = "0.";
 
   var duration = keys[keys.length - 1];
