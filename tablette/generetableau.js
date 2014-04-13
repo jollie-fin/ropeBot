@@ -1,5 +1,3 @@
-document.rootElement.addEventListener("SVGLoad", init, false);
-
 function transformfromprogram(start, p)
 {
   var repetition = new Array();  
@@ -308,7 +306,7 @@ function createNale(start, p)
 
   t = transformfromprogram(start,p);
 
-  duration = t["duration"] * 0.2;
+  duration = t["duration"] * 0.5;
   duration = " " + duration + "s";
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
@@ -318,7 +316,7 @@ function createNale(start, p)
   trans.setAttributeNS(null, "fill", "freeze");
   trans.setAttributeNS(null, "values", t["translate"]);
   trans.setAttributeNS(null, "keyTimes", t["keys"]);
-  trans.setAttributeNS(null, "begin", "0s");
+  trans.setAttributeNS(null, "begin", "indefinite");
   trans.setAttributeNS(null, "dur", duration);
 
   
@@ -330,7 +328,7 @@ function createNale(start, p)
   rotate.setAttributeNS(null, "type", "rotate");
   rotate.setAttributeNS(null, "values", t["rotate"]);
   rotate.setAttributeNS(null, "keyTimes", t["keys"]);
-  rotate.setAttributeNS(null, "begin", "0s");
+  rotate.setAttributeNS(null, "begin", "indefinite");
   rotate.setAttributeNS(null, "dur", duration);
 
   nale.appendChild(rotate);
@@ -357,7 +355,7 @@ function createNale(start, p)
   pctrans.setAttributeNS(null, "fill", "freeze");
   pctrans.setAttributeNS(null, "values", t["pctrans"]);
   pctrans.setAttributeNS(null, "keyTimes", t["keys"]);
-  pctrans.setAttributeNS(null, "begin", "0s");
+  pctrans.setAttributeNS(null, "begin", "indefinite");
   pctrans.setAttributeNS(null, "dur", duration);
   pctrans.setAttributeNS(null, "calcMode", "discrete");
 
@@ -426,8 +424,6 @@ function move()
 	document.getElementById("nalerotation").beginElement();
 	document.getElementById("naletranslation").beginElement();
   document.getElementById("nalepc").beginElement();
-
-nalepc
 }
 
 function init()
@@ -435,3 +431,4 @@ function init()
   createMap();  
   document.rootElement.addEventListener("click", move, false);
 }
+
