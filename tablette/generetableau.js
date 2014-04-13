@@ -34,15 +34,24 @@ function transformfromprogram(start, p)
   trans = " " + (width*x) + "," + (width*y);
   keys[iteration] = 0.;
 
-
+  pcs[iteration] = pc;
   while (pc < p.length && iteration < 100)
   {
-    if (p[pc][1] == -1 || repetition[pc] < p[pc][1])
-    {
-      pcs[iteration] = pc;
-      if (p[pc][1] != -1)
-        repetition[pc]++;
+    var valide = true;
+    var color = background[y][x];
 
+    if (valide && p[pc][2] != "" && p[pc][2][0] != "!" && color != p[pc][2])
+      valide = false;
+
+    if (valide && p[pc][2] != "" && p[pc][2][0] == "!" && (color == p[pc][2].substring(1,p[pc][2].length)))
+      valide = false;
+
+    if (valide && p[pc][1] != -1 && repetition[pc] >= p[pc][1])
+      valide = false;
+
+    if (valide)
+    {
+      repetition[pc]++;
       switch (p[pc][0][0])
       {
         case "L":
@@ -54,6 +63,7 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
+          pcs[iteration+1] = pc;
           break;
 
         case "R":
@@ -65,6 +75,7 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
+          pcs[iteration+1] = pc;
           break;
 
         case "F":
@@ -81,6 +92,7 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
+          pcs[iteration+1] = pc;
           break;
 
         case "B":
@@ -95,20 +107,22 @@ function transformfromprogram(start, p)
 
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + 1.;
+          keys[iteration+1] = keys[iteration] + .4;
           pc++;
+          pcs[iteration+1] = pc;
           break;
 
         case "G":
-          var label = p[pc][0][1];
+          var label = p[pc][0].substring(1,p[pc][0].length);
           var i = 0;
-          while (i < p.length && p[i][0][0] != label)
+          while (i < p.length && p[i][0] != label)
             i++;
 
           rotate += ";" + dirangle + "," + offset + "," + offset;
           trans += ";" + (width*x) + "," + (width*y);
-          keys[iteration+1] = keys[iteration] + 1.;
+          keys[iteration+1] = keys[iteration] + .4;
           pc = i;
+          pcs[iteration+1] = pc;
           break;
 
         default:
@@ -116,6 +130,7 @@ function transformfromprogram(start, p)
           trans += ";" + (width*x) + "," + (width*y);
           keys[iteration+1] = keys[iteration] + 1.;
           pc++;
+          pcs[iteration+1] = pc;
           break;
       }
       iteration++;
@@ -125,8 +140,6 @@ function transformfromprogram(start, p)
       pc++;
     }
   }
-  pcs[iteration] = pc;
-
   var keysstring = "0.";
 
   var duration = keys[keys.length - 1];
@@ -236,7 +249,7 @@ function createNale(start, p)
 
   t = transformfromprogram(start,p);
 
-  duration = t["duration"] * 1.;
+  duration = t["duration"] * .25;
   duration = " " + duration + "s";
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
