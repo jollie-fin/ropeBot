@@ -316,7 +316,7 @@ function createNale(start, p)
   trans.setAttributeNS(null, "fill", "freeze");
   trans.setAttributeNS(null, "values", t["translate"]);
   trans.setAttributeNS(null, "keyTimes", t["keys"]);
-  trans.setAttributeNS(null, "begin", "indefinite");
+  trans.setAttributeNS(null, "begin", "nalepc.begin");
   trans.setAttributeNS(null, "dur", duration);
 
   
@@ -328,7 +328,7 @@ function createNale(start, p)
   rotate.setAttributeNS(null, "type", "rotate");
   rotate.setAttributeNS(null, "values", t["rotate"]);
   rotate.setAttributeNS(null, "keyTimes", t["keys"]);
-  rotate.setAttributeNS(null, "begin", "indefinite");
+  rotate.setAttributeNS(null, "begin", "nalepc.begin");
   rotate.setAttributeNS(null, "dur", duration);
 
   nale.appendChild(rotate);
@@ -421,8 +421,6 @@ function createMap()
 
 function move()
 {
-	document.getElementById("nalerotation").beginElement();
-	document.getElementById("naletranslation").beginElement();
   document.getElementById("nalepc").beginElement();
 }
 
