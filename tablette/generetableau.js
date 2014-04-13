@@ -2,7 +2,6 @@ document.rootElement.addEventListener("SVGLoad", init, false);
 
 function transformfromprogram(start, p)
 {
-  alert("c'est parti");
   var repetition = new Array();  
 
   var x = start["x"];
@@ -137,14 +136,14 @@ function transformfromprogram(start, p)
     keysstring += "; " + (keys[i] / duration);
   }
 
-  pcstransinit = "0,0";
-  for (var i = 1; i < keys.length; i++)
+
+  var pcstrans = "0,0";
+  for (var i = 1; i < pcs.length; i++)
   {
-    pctrans += "; 0," + pcs[i];
+    pcstrans += "; 0," + pcs[i]*width;
   }
-
-  pcstransinit = "translate(0,0)";
-
+  var pcstransinit = "translate(0,0)";
+  
 
   return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pcstrans, "pctransinit" : pcstransinit};
 }
@@ -239,7 +238,6 @@ function createNale(start, p)
 
   duration = t["duration"] * 1.;
   duration = " " + duration + "s";
-  alert("plop3");
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
   trans.setAttributeNS(null, "attributeName", "transform");
