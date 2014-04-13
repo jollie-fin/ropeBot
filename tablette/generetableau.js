@@ -1,5 +1,155 @@
 document.rootElement.addEventListener("SVGLoad", init, false);
 
+function transformfromprogram(start, p)
+{
+  alert("c'est parti");
+  var repetition = new Array();  
+
+  var x = start["x"];
+  var y = start["y"];
+  var d = start["d"];
+
+  var delta=[[0,-1],[1,0],[0,1],[-1,0]];
+  var dir = 0;
+  if (d in mapdirection)
+  dir = mapdirection[d];
+
+  var dirangle = 90 * dir;
+  var width = 40.;
+  var offset = width / 2.;
+
+  var rotate = "";
+  var trans = "";
+  var keys = new Array();
+  var pcs = new Array();
+  var iteration = 0;
+  var pc = 0;
+
+  for (var i = 0; i < p.length; i++)
+    repetition[i] = 0;
+
+  rotateinit = "rotate(" + dirangle + "," + offset + "," + offset + ")";
+  transinit = "translate(" + (width*x) + "," + (width*y)+ ")";
+
+  rotate = " " + dirangle + "," + offset + "," + offset;
+  trans = " " + (width*x) + "," + (width*y);
+  keys[iteration] = 0.;
+
+
+  while (pc < p.length && iteration < 100)
+  {
+    if (p[pc][1] == -1 || repetition[pc] < p[pc][1])
+    {
+      pcs[iteration] = pc;
+      if (p[pc][1] != -1)
+        repetition[pc]++;
+
+      switch (p[pc][0][0])
+      {
+        case "L":
+          dir--;
+          if (dir == -1)
+            dir = 3;
+          dirangle -= 90;
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + 1.;
+          pc++;
+          break;
+
+        case "R":
+          dir++;
+          if (dir == 4)
+            dir = 0;
+          dirangle += 90;
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + 1.;
+          pc++;
+          break;
+
+        case "F":
+          var nb = parseInt(p[pc][0][1]);
+          x += nb*delta[dir][0];
+          y += nb*delta[dir][1];
+          if (x < 0 || x >= 12 || y < 0 || y >= 12)
+          {
+            pc = p.length;
+            break;
+          }
+
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + 1.;
+          pc++;
+          break;
+
+        case "B":
+          var nb = parseInt(p[pc][0][1]);
+          x -= nb*delta[dir][0];
+          y -= nb*delta[dir][1];
+          if (x < 0 || x >= 12 || y < 0 || y >= 12)
+          {
+            pc = p.length;
+            break;
+          }
+
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + 1.;
+          pc++;
+          break;
+
+        case "G":
+          var label = p[pc][0][1];
+          var i = 0;
+          while (i < p.length && p[i][0][0] != label)
+            i++;
+
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + .2;
+          pc = i;
+          break;
+
+        default:
+          rotate += ";" + dirangle + "," + offset + "," + offset;
+          trans += ";" + (width*x) + "," + (width*y);
+          keys[iteration+1] = keys[iteration] + .2;
+          pc++;
+          break;
+      }
+      iteration++;
+    }
+    else
+    {
+      pc++;
+    }
+  }
+  pcs[iteration] = pc;
+
+  var keysstring = "0.";
+
+  var duration = keys[keys.length - 1];
+
+  for (var i = 1; i < keys.length; i++)
+  {
+    keysstring += "; " + (keys[i] / duration);
+  }
+
+  pcstransinit = "0,0";
+  for (var i = 1; i < keys.length; i++)
+  {
+    pctrans += "; 0," + pcs[i];
+  }
+
+  pcstransinit = "translate(0,0)";
+
+
+  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pcstrans, "pctransinit" : pcstransinit};
+}
+
+
 function createSymbole(x,y,width,s)
 {
   var x = x*width;
@@ -60,84 +210,19 @@ function coordNale()
   var width = 40.;
   var radius = 10.;
   
-  for (var i=0; i<3; i++)
+  for (var i=-1; i<2; i++)
   {
-    dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
-    dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+2./3.*i))-radius*0.8;
+    dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
+    dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i))-radius*0.4;
     points = points + dx + "," + dy + " ";
   }
   return points;
 }
 
-function transformfromstring(x, y, d, s)
+
+function createNale(start, p)
 {
-  var delta=[[0,-1],[1,0],[0,1],[-1,0]];
-  var dir = 0;
-  if (d in mapdirection)
-  dir = mapdirection[d];
 
-  var dirangle = 90 * dir;
-  var width = 40.;
-  var offset = width / 2.;
-
-  var rotate = "";
-  var trans = "";
-  var duration = 0;
-
-  var x = x;
-  var y = y;
-  rotateinit = "rotate(" + dirangle + "," + offset + "," + offset + ")";
-  transinit = "translate(" + (width*x) + "," + (width*y)+ ")";
-
-  rotate = " " + dirangle + "," + offset + "," + offset;
-  trans = " " + (width*x) + "," + (width*y);
-
-  for (var i = 0; i < s.length; i++)
-  {
-    switch (s[i])
-    {
-      case "A":
-        x += delta[dir][0];
-        y += delta[dir][1];
-        rotate += ";" + dirangle + "," + offset + "," + offset;
-        trans += ";" + (width*x) + "," + (width*y);
-        duration++;
-        break;
-
-      case "R":
-        x -= delta[dir][0];
-        y -= delta[dir][1];
-        rotate += ";" + dirangle + "," + offset + "," + offset;
-        trans += ";" + (width*x) + "," + (width*y);
-        duration++;
-        break;
-
-      case "D":
-        dir++;
-        if (dir == 4)
-          dir = 0;
-        dirangle += 90;
-        rotate += ";" + dirangle + "," + offset + "," + offset;
-        trans += ";" + (width*x) + "," + (width*y);
-        duration++;
-        break;
-        
-      case "G":
-        dir--;
-        if (dir == -1)
-          dir = 3;
-        dirangle -= 90;
-        rotate += ";" + dirangle + "," + offset + "," + offset;
-        trans += ";" + (width*x) + "," + (width*y);
-        duration++;
-        break;
-    }
-  }
-  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration};
-}
-
-function createNale(x, y, d, s)
-{
   var tri = document.createElementNS(svgns, "polygon");
   var points = coordNale();
 
@@ -149,10 +234,12 @@ function createNale(x, y, d, s)
 
   var group = document.createElementNS(svgns, "g");
 
-  t = transformfromstring(x,y,d,s);
+  t = transformfromprogram(start,p);
 
-  duration = t["duration"] * 1;
+
+  duration = t["duration"] * 1.;
   duration = " " + duration + "s";
+  alert("plop3");
   var trans = document.createElementNS(svgns, "animateTransform");
   trans.setAttributeNS(null, "id", "naletranslation");
   trans.setAttributeNS(null, "attributeName", "transform");
@@ -160,6 +247,7 @@ function createNale(x, y, d, s)
   trans.setAttributeNS(null, "type", "translate");
   trans.setAttributeNS(null, "fill", "freeze");
   trans.setAttributeNS(null, "values", t["translate"]);
+  trans.setAttributeNS(null, "keyTimes", t["keys"]);
   trans.setAttributeNS(null, "begin", "indefinite");
   trans.setAttributeNS(null, "dur", duration);
 
@@ -171,12 +259,13 @@ function createNale(x, y, d, s)
   rotate.setAttributeNS(null, "fill", "freeze");
   rotate.setAttributeNS(null, "type", "rotate");
   rotate.setAttributeNS(null, "values", t["rotate"]);
+  rotate.setAttributeNS(null, "keyTimes", t["keys"]);
   rotate.setAttributeNS(null, "begin", "indefinite");
   rotate.setAttributeNS(null, "dur", duration);
   tri.appendChild(rotate);
   tri.setAttributeNS(null, "transform", t["rotateinit"]);
 
-  tri.setAttributeNS(null, "transform", t["translateinit"]);
+  group.setAttributeNS(null, "transform", t["translateinit"]);
   
   group.appendChild(tri);
   group.appendChild(trans);
@@ -223,7 +312,7 @@ function createMap()
       }
     }
   }
-  document.rootElement.appendChild(createNale(2,2,"up","AAGRGAADA"));
+  document.rootElement.appendChild(createNale(startingposition,program));
 }
 
 function move()
