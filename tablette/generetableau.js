@@ -322,7 +322,7 @@ function createNale(start, p)
   trans.setAttributeNS(null, "fill", "freeze");
   trans.setAttributeNS(null, "values", t["translate"]);
   trans.setAttributeNS(null, "keyTimes", t["keys"]);
-  trans.setAttributeNS(null, "begin", "indefinite");
+  trans.setAttributeNS(null, "begin", "0s");
   trans.setAttributeNS(null, "dur", duration);
 
   
@@ -334,7 +334,7 @@ function createNale(start, p)
   rotate.setAttributeNS(null, "type", "rotate");
   rotate.setAttributeNS(null, "values", t["rotate"]);
   rotate.setAttributeNS(null, "keyTimes", t["keys"]);
-  rotate.setAttributeNS(null, "begin", "indefinite");
+  rotate.setAttributeNS(null, "begin", "0s");
   rotate.setAttributeNS(null, "dur", duration);
 
   nale.appendChild(rotate);
@@ -361,7 +361,7 @@ function createNale(start, p)
   pctrans.setAttributeNS(null, "fill", "freeze");
   pctrans.setAttributeNS(null, "values", t["pctrans"]);
   pctrans.setAttributeNS(null, "keyTimes", t["keys"]);
-  pctrans.setAttributeNS(null, "begin", "indefinite");
+  pctrans.setAttributeNS(null, "begin", "0s");
   pctrans.setAttributeNS(null, "dur", duration);
   pctrans.setAttributeNS(null, "calcMode", "discrete");
 
