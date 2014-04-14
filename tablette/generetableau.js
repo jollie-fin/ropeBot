@@ -25,7 +25,9 @@ function transformfromprogram(start, p,width)
   var dir = 1;
   if (d in data.map.direction)
     dir = data.map.direction[d];
-
+  var dirice = 1;
+  var onice = false;
+  var coeffice = 1;
   var dirangle = 90 * dir;
 
   var offset = width / 2.;
@@ -102,7 +104,42 @@ function transformfromprogram(start, p,width)
           if (dir == -1)
             dir = 3;
           dirangle += coeff*90;
-          iterate(x,y,dirangle,1.);
+
+          var newx = x+coeffice*delta[dirice][0];
+          var newy = y+coeffice*delta[dirice][1];
+          var ground = groundAt(x,y);
+          var newground = groundAt(newx,newy);
+
+          if (ground != "ice")
+            onice = false;
+
+          if (onice)
+          {
+            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            {
+              iterate(x,y,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground == "lava")
+            {
+              iterate(newx,newy,dirangle,1.);
+              iterate(newx,newy,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground != "wall")
+            {
+              x = newx;
+              y = newy;
+            }
+            iterate(x,y,dirangle,1.);
+          }
+          else
+          {
+            iterate(x,y,dirangle,1.);
+          }
+
           pc++;
           break;
 
@@ -134,24 +171,35 @@ function transformfromprogram(start, p,width)
             }
             if (ground == "sand")
             {
-                if (i < nb-1)
-                {
-                  i++;
-                  x = newx;
-                  y = newy;
-                  iterate(x,y,dirangle,2.);
-                }
-                else
-                {
-                  iterate(x,y,dirangle,1.);
-                  break;
-                }
+              onice = false;
+              if (i < nb-1)
+              {
+                i++;
+                x = newx;
+                y = newy;
+                iterate(x,y,dirangle,2.);
+              }
+              else
+              {
+                iterate(x,y,dirangle,1.);
+                break;
+              }
+            }
+            else if (newground == "ice" || ground == "ice")
+            {
+              dirice = dir;
+              coeffice = coeff;
+              onice = true;
+              x = newx;
+              y = newy;
+              iterate(x,y,dirangle,1.);
             }
             else
             {
-                x = newx;
-                y = newy;
-                iterate(x,y,dirangle,1.);
+              onice = false;
+              x = newx;
+              y = newy;
+              iterate(x,y,dirangle,1.);
             }
 
             if (newground == "lava")
@@ -197,8 +245,76 @@ function transformfromprogram(start, p,width)
           while (i < p.length && p[i][0] != label)
             i++;
 
-          iterate(x,y,dirangle,.4);
+          var newx = x+coeffice*delta[dirice][0];
+          var newy = y+coeffice*delta[dirice][1];
+          var ground = groundAt(x,y);
+          var newground = groundAt(newx,newy);
+
+          if (ground != "ice")
+            onice = false;
+
+          if (onice)
+          {
+            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            {
+              iterate(x,y,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground == "lava")
+            {
+              iterate(newx,newy,dirangle,1.);
+              iterate(newx,newy,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground != "wall")
+            {
+              x = newx;
+              y = newy;
+            }
+            iterate(x,y,dirangle,1.);
+          }
+          else
+          {
+            iterate(x,y,dirangle,.4);
+          }
           pc = i;
+          break;
+
+        case "N":
+          var newx = x+coeffice*delta[dirice][0];
+          var newy = y+coeffice*delta[dirice][1];
+          var ground = groundAt(x,y);
+          var newground = groundAt(newx,newy);
+
+          if (ground != "ice")
+            onice = false;
+
+          if (onice)
+          {
+            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            {
+              iterate(x,y,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground == "lava")
+            {
+              iterate(newx,newy,dirangle,1.);
+              iterate(newx,newy,dirangle+720.,2.);
+              stop = true;
+              break;
+            }
+            else if (newground != "wall")
+            {
+              x = newx;
+              y = newy;
+            }
+            iterate(x,y,dirangle,1.);
+          }
+
+          pc++;
           break;
 
         default:

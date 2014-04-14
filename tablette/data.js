@@ -37,22 +37,21 @@ data.level.symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
 //data.level.ground = {"Blue" : "L"};
-data.level.ground = {"Black" : "A"};
+data.level.ground = {"Black" : "I"};
 //data.level.ground = {};
 /*
-TL : turn left
-TR : turn right
-FW : forward
-FWX : forward X tiles
-BW : backward
-BW : backward X tiles
+L : turn left
+R : turn right
+FX : forward X tiles
+BX : backward X tiles
 LX : label X
 GX : goto label X
+N : nop
 */
 
 
 data.program = {};
-data.program.start = {"x" : 1, "y" : 3, "d" : "up"};
+/*data.program.start = {"x" : 1, "y" : 3, "d" : "up"};
 data.program.content = [
 ["1",-1,"",""],
 ["R",-1,"","T"],
@@ -68,7 +67,21 @@ data.program.content = [
 ["F1",-1,"",""],
 ["G4",-1,"Red","C"],
 ["G3",-1,"",""],
-["4",-1,"",""]];
+["4",-1,"",""]];*/
+
+data.program.start = {"x" : 6, "y" : 7, "d" : "up"};
+data.program.content = [
+["F1",-1,"",""],
+["R",-1,"",""],
+["R",-1,"",""],
+["N",-1,"",""],
+["F1",-1,"",""],
+["L",-1,"",""],
+["F1",-1,"",""],
+["R",-1,"",""],
+["F1",-1,"",""],
+["R",-1,"",""],
+["R",-1,"",""]];
 
 data.map = {};
 data.map.color = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
