@@ -1,6 +1,9 @@
 const svgns = "http://www.w3.org/2000/svg";
 
-var background = [
+var data = {};
+data.level = {};
+
+data.level.background = [
 ["Cyan", "Grey", "Purple", "Grey", "Black", "Grey", "Black", "Grey", "Pink", "Grey", "Purple", "Grey"],
 ["Yellow", "Grey", "Grey", "Grey", "Black", "Red", "Black", "Black", "Black", "Black", "Grey", "Black"],
 ["Black", "Red", "Yellow", "Grey", "Red", "Grey", "Grey", "Purple", "Black", "Red", "Blue", "Grey"],
@@ -19,7 +22,7 @@ var background = [
   T : triangle
   S : star*/
 
-var symb = [
+data.level.symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
 [" ", "T", " ", " ", " ", " ", " ", " ", " ", " ", "T", " "],
 [" ", " ", " ", " ", "C", " ", " ", " ", " ", " ", " ", " "],
@@ -33,9 +36,9 @@ var symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "T", " "],
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
-//var groundlevel = {"Blue" : "L"};
-var groundlevel = {"Black" : "A", "Blue" : "L"};
-//var groundlevel = {};
+//data.level.ground = {"Blue" : "L"};
+data.level.ground = {"Black" : "A", "Blue" : "L"};
+//data.level.ground = {};
 /*
 TL : turn left
 TR : turn right
@@ -48,11 +51,13 @@ GX : goto label X
 */
 
 
-var startingposition = {"x" : 1, "y" : 3, "d" : "up"};
-var program = [
+data.program = {};
+data.program.start = {"x" : 1, "y" : 3, "d" : "up"};
+data.program.content = [
 ["1",-1,"",""],
 ["R",-1,"","T"],
 ["F1",-1,"",""],
+["F0",-1,"",""],
 ["G1",-1,"!Pink",""],
 ["2",-1,"",""],
 ["F1",-1,"!Grey",""],
@@ -65,21 +70,13 @@ var program = [
 ["G3",-1,"",""],
 ["4",-1,"",""]];
 
-/*var startingposition = {"x" : 4, "y" : 4, "d" : "left"};
-var program = [
-["1",-1,"",""],
-["F1",-1,"",""],
-["R",-1,"",""],
-["F1",-1,"",""],
-["L",-1,"",""],
-["G1",-1,"",""]];*/
+data.map = {};
+data.map.color = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
+data.map.symbcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
+data.map.symb = {"C" : "circle", "R" : "square", "T" : "triangle", "S" : "star"};
+data.map.ground = {"S" : "sand", "A" : "space", "I" : "ice", "W" : "wall", "L" : "lava"};
 
-var mapcolor = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
-var mapsymbcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
-var mapsymb = {"C" : "circle", "R" : "square", "T" : "triangle", "S" : "star"};
-var mapground = {"S" : "sand", "A" : "space", "I" : "ice", "W" : "wall", "L" : "lava"};
-
-var mapcolordefault = "rgb(0,0,255)";
-var mapsymbcolordefault = "rgb(255,255,255)";
-var mapdirection = {"up" : 0, "left" : 3, "down" : 2, "right" : 1};
+data.map.colordefault = "rgb(0,0,255)";
+data.map.symbcolordefault = "rgb(255,255,255)";
+data.map.direction = {"up" : 0, "left" : 3, "down" : 2, "right" : 1};
 

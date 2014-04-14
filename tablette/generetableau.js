@@ -23,8 +23,8 @@ function transformfromprogram(start, p,width)
 
   var delta=[[0,-1],[1,0],[0,1],[-1,0]];
   var dir = 1;
-  if (d in mapdirection)
-    dir = mapdirection[d];
+  if (d in data.map.direction)
+    dir = data.map.direction[d];
 
   var dirangle = 90 * dir;
 
@@ -48,15 +48,15 @@ function transformfromprogram(start, p,width)
 
   var groundAt = function(x,y)
   {
-    var color = background[y][x];
-    var symbol = symb[y][x];
+    var color = data.level.background[y][x];
+    var symbol = data.level.symb[y][x];
     var ground = "";
-    if (color in groundlevel)
-      ground = groundlevel[color];
-    if (symbol in groundlevel)
-      ground = groundlevel[symbol];
-    if (ground in mapground)
-      return mapground[ground];
+    if (color in data.level.ground)
+      ground = data.level.ground[color];
+    if (symbol in data.level.ground)
+      ground = data.level.ground[symbol];
+    if (ground in data.map.ground)
+      return data.map.ground[ground];
     else
       return "";
   }
@@ -76,8 +76,8 @@ function transformfromprogram(start, p,width)
   {
     var accept = true;
     
-    var color = background[y][x];
-    var symbol = symb[y][x];
+    var color = data.level.background[y][x];
+    var symbol = data.level.symb[y][x];
 
     accept = accept && (   p[pc][1] == -1
                         || repetition[pc] < p[pc][1]);
@@ -314,8 +314,6 @@ function coordNale(width)
 
 function createNale(start, p, width)
 {
-
-
   var points = coordNale(width);
   t = transformfromprogram(start,p,width);
 
@@ -419,9 +417,9 @@ function createMap(width)
   {
     for (var j=0; j<12; j++)
     {
-      var color = mapcolordefault;
-      if (background[i][j] in mapcolor)
-        color = mapcolor[background[i][j]];
+      var color = data.map.colordefault;
+      if (data.level.background[i][j] in data.map.color)
+        color = data.map.color[data.level.background[i][j]];
 
       var tile =
         createSVGobject("rect",
@@ -444,13 +442,13 @@ function createMap(width)
   {
     for (var j=0; j<12; j++)
     {
-      var color = mapsymbcolordefault;
-      if (background[i][j] in mapsymbcolor)
-        color = mapsymbcolor[background[i][j]];
+      var color = data.map.symbcolordefault;
+      if (data.level.background[i][j] in data.map.symbcolor)
+        color = data.map.symbcolor[data.level.background[i][j]];
 
-      if (symb[i][j] in mapsymb)
+      if (data.level.symb[i][j] in data.map.symb)
       {
-        var symbole = createSymbole(width,mapsymb[symb[i][j]]);
+        var symbole = createSymbole(width,data.map.symb[data.level.symb[i][j]]);
         if (symbole !== undefined)
         {
           symbole.setAttributeNS(null, "transform", "translate("+(width*j)+","+(width*i)+")");
@@ -469,7 +467,7 @@ function createMap(width)
   SVGbackground.appendChild(SVGbackgroundsymb);
 
   document.rootElement.appendChild(SVGbackground);
-  document.rootElement.appendChild(createNale(startingposition,program,width));
+  document.rootElement.appendChild(createNale(data.program.start,data.program.content,width));
 }
 
 function move()
