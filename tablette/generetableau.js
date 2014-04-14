@@ -1,3 +1,18 @@
+//http://stackoverflow.com/questions/894860/set-a-default-parameter-value-for-a-javascript-function
+function defaultFor(arg, val)
+{ return typeof arg !== 'undefined' ? arg : val; }
+
+function createSVGobject(type, attribute, namespace)
+{
+  namespace = defaultFor(namespace, null);
+  newSVGobject = document.createElementNS(svgns, type);
+  for (var key in attribute)
+  {
+    newSVGobject.setAttributeNS(namespace, key, attribute[key]);
+  }
+  return newSVGobject;
+}
+
 function transformfromprogram(start, p)
 {
   var repetition = new Array();  
@@ -219,29 +234,32 @@ function transformfromprogram(start, p)
 }
 
 
-function createSymbole(x,y,width,s)
+function createSymbole(width,s)
 {
   var x = x*width;
   var y = y*width;
   switch (s)
   {
     case "circle":
-      var circle = document.createElementNS(svgns, "circle");
-      circle.setAttributeNS(null, "cx", width/2.);
-      circle.setAttributeNS(null, "cy", width/2.);
-      circle.setAttributeNS(null, "r", width/3.);
-      return circle;
+      var newSVGobject =
+        createSVGobject("circle",
+                         {"cx": width/2.,
+                          "cy": width/2.,
+                          "r" : width/3.});
+      return newSVGobject;
+
     case "square":
-      var rect = document.createElementNS(svgns, "rect");
-      rect.setAttributeNS(null, "x", width/6.);
-      rect.setAttributeNS(null, "y", width/6.);
-      rect.setAttributeNS(null, "width", width*2./3.);
-      rect.setAttributeNS(null, "height", width*2./3.);
-      return rect;
+      var newSVGobject =
+        createSVGobject("rect",
+                         {"x" : width/6.,
+                          "y" : width/6.,
+                          "width" : width*2./3.,
+                          "height": width*2./3.});
+      return newSVGobject;
+
 // triangle
     case "triangle":
       var radius = width * .4;
-      var tri = document.createElementNS(svgns, "polygon");
       var points = "";
 
       for (var i=0; i<3; i++)
@@ -251,12 +269,14 @@ function createSymbole(x,y,width,s)
         points = points + dx + "," + dy + " ";
       }
 
-      tri.setAttributeNS(null, "points", points);
-      return tri;
+      var newSVGobject =
+        createSVGobject("polygon",
+                         {"points":points});
+      return newSVGobject;
+
 //star
     case "star":
       var radius = width * .4;
-      var tri = document.createElementNS(svgns, "polygon");
       var points = "";
 
       for (var i=0; i<5; i++)
@@ -266,8 +286,11 @@ function createSymbole(x,y,width,s)
         points = points + dx + "," + dy + " ";
       }
 
-      tri.setAttributeNS(null, "points", points);
-      return tri;
+      var newSVGobject =
+        createSVGobject("polygon",
+                         {"points":points});
+      return newSVGobject;
+
     default:
       return undefined;
   }
@@ -292,82 +315,92 @@ function coordNale()
 function createNale(start, p)
 {
 
-  var nale = document.createElementNS(svgns, "polygon");
   var points = coordNale();
-
-
-  nale.setAttributeNS(null, "points", points);
-  nale.setAttributeNS(null, "id", "nale");
-
-  nale.setAttributeNS(null, "style", "fill: orange;stroke:black;stroke-width:1px;");
-
-  var group = document.createElementNS(svgns, "g");
-  var groupnale = document.createElementNS(svgns, "g");
-
   t = transformfromprogram(start,p);
+
+  var nale =
+    createSVGobject("polygon",
+                     {"points":points,
+                      "id"    :"nale",
+                      "style" : "fill: orange;stroke:black;stroke-width:1px;",
+                      "transform": t["rotateinit"]});
+
 
   duration = t["duration"] * 0.5;
   duration = " " + duration + "s";
-  var trans = document.createElementNS(svgns, "animateTransform");
-  trans.setAttributeNS(null, "id", "naletranslation");
-  trans.setAttributeNS(null, "attributeName", "transform");
-  trans.setAttributeNS(null, "attributeType", "XML");
-  trans.setAttributeNS(null, "type", "translate");
-  trans.setAttributeNS(null, "fill", "freeze");
-  trans.setAttributeNS(null, "values", t["translate"]);
-  trans.setAttributeNS(null, "keyTimes", t["keys"]);
-  trans.setAttributeNS(null, "begin", "nalepc.begin");
-  trans.setAttributeNS(null, "dur", duration);
 
-  
-  var rotate = document.createElementNS(svgns, "animateTransform");
-  rotate.setAttributeNS(null, "id", "nalerotation");
-  rotate.setAttributeNS(null, "attributeName", "transform");
-  rotate.setAttributeNS(null, "attributeType", "XML");
-  rotate.setAttributeNS(null, "fill", "freeze");
-  rotate.setAttributeNS(null, "type", "rotate");
-  rotate.setAttributeNS(null, "values", t["rotate"]);
-  rotate.setAttributeNS(null, "keyTimes", t["keys"]);
-  rotate.setAttributeNS(null, "begin", "nalepc.begin");
-  rotate.setAttributeNS(null, "dur", duration);
+  var trans =
+    createSVGobject("animateTransform",
+                     {"id": "naleanimationtranslation",
+                      "attributeName": "transform",
+                      "attributeType": "XML",
+                      "type": "translate",
+                      "fill": "freeze",
+                      "values": t["translate"],
+                      "keyTimes": t["keys"],
+                      "begin": "pcanimationtranslation.begin",
+                      "dur": duration});
+
+  var rotate =
+    createSVGobject("animateTransform",
+                     {"id": "naleanimationrotation",
+                      "attributeName": "transform",
+                      "attributeType": "XML",
+                      "fill": "freeze",
+                      "type": "rotate",
+                      "values": t["rotate"],
+                      "keyTimes": t["keys"],
+                      "begin": "pcanimationtranslation.begin",
+                      "dur": duration});
 
   nale.appendChild(rotate);
-  nale.setAttributeNS(null, "transform", t["rotateinit"]);
 
-  groupnale.setAttributeNS(null, "transform", t["translateinit"]);
+  var groupnale =
+    createSVGobject("g",
+                     {"id" : "translatenale",
+                      "transform": t["translateinit"]});
+
   groupnale.appendChild(nale);
   groupnale.appendChild(trans);
+
+  var group =
+    createSVGobject("g",
+                     {"id" : "simulationobjects"});
   group.appendChild(groupnale);
 
-  var pc = document.createElementNS(svgns, "rect");
-  pc.setAttributeNS(null, "x", "480");
-  pc.setAttributeNS(null, "y", "5");
-  pc.setAttributeNS(null, "width", "10");
-  pc.setAttributeNS(null, "height", "10");
-  pc.setAttributeNS(null, "style", "fill: green;stroke:black;stroke-width:1px;");
-  pc.setAttributeNS(null, "transform", t["pctransinit"]);
+  var pc =
+    createSVGobject ("rect",
+                      {"x": "480",
+                       "y": "5",
+                       "id": "pcindicator",
+                       "width": "10",
+                       "height": "10",
+                       "style": "fill: green;stroke:black;stroke-width:1px;",
+                       "transform": t["pctransinit"]});
 
-  var pctrans = document.createElementNS(svgns, "animateTransform");
-  pctrans.setAttributeNS(null, "id", "nalepc");
-  pctrans.setAttributeNS(null, "attributeName", "transform");
-  pctrans.setAttributeNS(null, "attributeType", "XML");
-  pctrans.setAttributeNS(null, "type", "translate");
-  pctrans.setAttributeNS(null, "fill", "freeze");
-  pctrans.setAttributeNS(null, "values", t["pctrans"]);
-  pctrans.setAttributeNS(null, "keyTimes", t["keys"]);
-  pctrans.setAttributeNS(null, "begin", "indefinite");
-  pctrans.setAttributeNS(null, "dur", duration);
-  pctrans.setAttributeNS(null, "calcMode", "discrete");
+  var pctrans = 
+    createSVGobject("animateTransform",
+                     {"id": "pcanimationtranslation",
+                      "attributeName": "transform",
+                      "attributeType": "XML",
+                      "type": "translate",
+                      "fill": "freeze",
+                      "values": t["pctrans"],
+                      "keyTimes": t["keys"],
+                      "begin": "indefinite",
+                      "dur": duration,
+                      "calcMode": "discrete"});
+
 
   pc.appendChild(pctrans);
-
   group.appendChild(pc);
   for (var i = 0; i < p.length; i++)
   {
-    var text = document.createElementNS(svgns, "text");
-    text.setAttribute("x", "493");
-    text.setAttribute("y", "" + (19+i*20));
-    text.setAttribute("font-size", "18px");
+    var text = 
+      createSVGobject("text",
+                       {"x": "493",
+                        "y": (19+i*20),
+                        "font-size": "18px"});
     text.textContent = p[i][0];
     group.appendChild(text);
   }
@@ -376,25 +409,34 @@ function createNale(start, p)
 
 function createMap()
 {
+  var SVGbackgroundtile =
+    createSVGobject("g",
+                     {"id" : "backgroundtile"});
+
   for (var i=0; i<12; i++)
   {
     for (var j=0; j<12; j++)
     {
-      var tile = document.createElementNS(svgns, "rect");
-      tile.setAttributeNS(null, "x", "0");
-      tile.setAttributeNS(null, "y", "0");
-      tile.setAttributeNS(null, "width", 40);
-      tile.setAttributeNS(null, "height", 40);
-      tile.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
       var color = mapcolordefault;
       if (background[i][j] in mapcolor)
         color = mapcolor[background[i][j]];
-      tile.setAttributeNS(null, "style", "fill:"+color+";stroke:black;stroke-width:1px;");
-      document.rootElement.appendChild(tile);
+
+      var tile =
+        createSVGobject("rect",
+                         {"x": "0",
+                          "y": "0",
+                          "width": 40,
+                          "height": 40,
+                          "transform": "translate("+(40*j)+","+(40*i)+")",
+                          "style" : "fill:"+color+";stroke:black;stroke-width:1px;"});
+
+      SVGbackgroundtile.appendChild(tile);
     }
   }
 
-
+  var SVGbackgroundsymb =
+    createSVGobject("g",
+                     {"id" : "backgroundsymb"});
 
   for (var i=0; i<12; i++)
   {
@@ -406,22 +448,31 @@ function createMap()
 
       if (symb[i][j] in mapsymb)
       {
-        var symbole = createSymbole(j,i,40,mapsymb[symb[i][j]]);
-        symbole.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
+        var symbole = createSymbole(40,mapsymb[symb[i][j]]);
         if (symbole !== undefined)
         {
+          symbole.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
           symbole.setAttributeNS(null, "style", "fill:"+color);
-          document.rootElement.appendChild(symbole);
+          SVGbackgroundsymb.appendChild(symbole);
         }
       }
     }
   }
+
+  var SVGbackground =
+    createSVGobject("g",
+                     {"id" : "background"});
+
+  SVGbackground.appendChild(SVGbackgroundtile);
+  SVGbackground.appendChild(SVGbackgroundsymb);
+
+  document.rootElement.appendChild(SVGbackground);
   document.rootElement.appendChild(createNale(startingposition,program));
 }
 
 function move()
 {
-  document.getElementById("nalepc").beginElement();
+  document.getElementById("pcanimationtranslation").beginElement();
 }
 
 function init()
