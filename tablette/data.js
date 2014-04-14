@@ -34,7 +34,7 @@ var symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
 //var groundlevel = {"Blue" : "L"};
-var groundlevel = {"Black" : "A"};
+var groundlevel = {"Black" : "A", "Blue" : "L"};
 //var groundlevel = {};
 /*
 TL : turn left

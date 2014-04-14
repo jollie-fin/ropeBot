@@ -13,7 +13,7 @@ function createSVGobject(type, attribute, namespace)
   return newSVGobject;
 }
 
-function transformfromprogram(start, p)
+function transformfromprogram(start, p,width)
 {
   var repetition = new Array();  
 
@@ -27,7 +27,7 @@ function transformfromprogram(start, p)
     dir = mapdirection[d];
 
   var dirangle = 90 * dir;
-  var width = 40.;
+
   var offset = width / 2.;
 
   var rotate = "";
@@ -118,8 +118,7 @@ function transformfromprogram(start, p)
 
             if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
             {
-              x = newx;
-              y = newy;
+              iterate(x,y,dirangle+720.,2.);
               stop = true;
               break;
             }
@@ -157,6 +156,7 @@ function transformfromprogram(start, p)
 
             if (newground == "lava")
             {
+              iterate(x,y,dirangle+720.,2.);
               stop = true;
               break;
             }
@@ -179,6 +179,7 @@ function transformfromprogram(start, p)
                 iterate(x,y,dirangle,nbcases);
                 if (newnewx < 0 || newnewx >= 12 || newnewy < 0 || newnewy >= 12)
                 {
+                  iterate(x,y,dirangle+720.,2.);
                   stop = true;
                   break;
                 }
@@ -296,11 +297,10 @@ function createSymbole(width,s)
   }
 }
 
-function coordNale()
+function coordNale(width)
 {
   var points = "";
-  var width = 40.;
-  var radius = 10.;
+  var radius = width/4.;
   
   for (var i=-1; i<2; i++)
   {
@@ -312,11 +312,12 @@ function coordNale()
 }
 
 
-function createNale(start, p)
+function createNale(start, p, width)
 {
 
-  var points = coordNale();
-  t = transformfromprogram(start,p);
+
+  var points = coordNale(width);
+  t = transformfromprogram(start,p,width);
 
   var nale =
     createSVGobject("polygon",
@@ -370,11 +371,11 @@ function createNale(start, p)
 
   var pc =
     createSVGobject ("rect",
-                      {"x": "480",
-                       "y": "5",
+                      {"x": width * 12.,
+                       "y": width / 8.,
                        "id": "pcindicator",
-                       "width": "10",
-                       "height": "10",
+                       "width": width / 4.,
+                       "height": width / 4.,
                        "style": "fill: green;stroke:black;stroke-width:1px;",
                        "transform": t["pctransinit"]});
 
@@ -398,16 +399,17 @@ function createNale(start, p)
   {
     var text = 
       createSVGobject("text",
-                       {"x": "493",
-                        "y": (19+i*20),
-                        "font-size": "18px"});
+                       {"x": width * (12.+.25+.075),
+                        "y": ((.5-.025)*width+i*width/2.),
+                        "font-size": ((.5-.05)*width)+"px"});
     text.textContent = p[i][0];
     group.appendChild(text);
   }
+
   return group;
 }
 
-function createMap()
+function createMap(width)
 {
   var SVGbackgroundtile =
     createSVGobject("g",
@@ -425,9 +427,9 @@ function createMap()
         createSVGobject("rect",
                          {"x": "0",
                           "y": "0",
-                          "width": 40,
-                          "height": 40,
-                          "transform": "translate("+(40*j)+","+(40*i)+")",
+                          "width": width,
+                          "height": width,
+                          "transform": "translate("+(width*j)+","+(width*i)+")",
                           "style" : "fill:"+color+";stroke:black;stroke-width:1px;"});
 
       SVGbackgroundtile.appendChild(tile);
@@ -448,10 +450,10 @@ function createMap()
 
       if (symb[i][j] in mapsymb)
       {
-        var symbole = createSymbole(40,mapsymb[symb[i][j]]);
+        var symbole = createSymbole(width,mapsymb[symb[i][j]]);
         if (symbole !== undefined)
         {
-          symbole.setAttributeNS(null, "transform", "translate("+(40*j)+","+(40*i)+")");
+          symbole.setAttributeNS(null, "transform", "translate("+(width*j)+","+(width*i)+")");
           symbole.setAttributeNS(null, "style", "fill:"+color);
           SVGbackgroundsymb.appendChild(symbole);
         }
@@ -467,7 +469,7 @@ function createMap()
   SVGbackground.appendChild(SVGbackgroundsymb);
 
   document.rootElement.appendChild(SVGbackground);
-  document.rootElement.appendChild(createNale(startingposition,program));
+  document.rootElement.appendChild(createNale(startingposition,program,width));
 }
 
 function move()
@@ -477,7 +479,7 @@ function move()
 
 function init()
 {
-  createMap();  
+  createMap(40.);  
   document.rootElement.addEventListener("click", move, false);
 }
 
