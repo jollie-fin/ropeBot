@@ -37,7 +37,7 @@ data.level.symb = [
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
 //data.level.ground = {"Blue" : "L"};
-data.level.ground = {"Black" : "A", "Blue" : "L"};
+data.level.ground = {"Black" : "A"};
 //data.level.ground = {};
 /*
 TL : turn left

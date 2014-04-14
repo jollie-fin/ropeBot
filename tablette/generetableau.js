@@ -312,7 +312,7 @@ function coordNale(width)
 }
 
 
-function createNale(start, p, width)
+function createSimulation(start, p, width)
 {
   var points = coordNale(width);
   t = transformfromprogram(start,p,width);
@@ -356,20 +356,15 @@ function createNale(start, p, width)
 
   var groupnale =
     createSVGobject("g",
-                     {"id" : "translatenale",
+                     {"id" : "nale",
                       "transform": t["translateinit"]});
 
   groupnale.appendChild(nale);
   groupnale.appendChild(trans);
 
-  var group =
-    createSVGobject("g",
-                     {"id" : "simulationobjects"});
-  group.appendChild(groupnale);
-
   var pc =
     createSVGobject ("rect",
-                      {"x": width * 12.,
+                      {"x": 0,
                        "y": width / 8.,
                        "id": "pcindicator",
                        "width": width / 4.,
@@ -392,19 +387,24 @@ function createNale(start, p, width)
 
 
   pc.appendChild(pctrans);
-  group.appendChild(pc);
+  var grouppc =
+    createSVGobject("g",
+                     {"id" : "pc"});
+
+  grouppc.appendChild(pc);
   for (var i = 0; i < p.length; i++)
   {
     var text = 
       createSVGobject("text",
-                       {"x": width * (12.+.25+.075),
-                        "y": ((.5-.025)*width+i*width/2.),
-                        "font-size": ((.5-.05)*width)+"px"});
+                       {"x": width/2. * .65,
+                        "y": width/2. * (.95+i),
+                        "font-size": (width/2.*.9)+"px"});
     text.textContent = p[i][0];
-    group.appendChild(text);
+    grouppc.appendChild(text);
   }
 
-  return group;
+  simulation = {"map" : groupnale, "exec" : grouppc};
+  return simulation;
 }
 
 function createMap(width)
@@ -459,15 +459,25 @@ function createMap(width)
     }
   }
 
-  var SVGbackground =
+  var SVGmap =
     createSVGobject("g",
-                     {"id" : "background"});
+                     {"id" : "map"});
 
-  SVGbackground.appendChild(SVGbackgroundtile);
-  SVGbackground.appendChild(SVGbackgroundsymb);
 
-  document.rootElement.appendChild(SVGbackground);
-  document.rootElement.appendChild(createNale(data.program.start,data.program.content,width));
+  simulation = createSimulation(data.program.start,data.program.content,width);
+
+  var SVGexec =
+    createSVGobject("g",
+                     {"id" : "execution"});
+
+  SVGmap.appendChild(SVGbackgroundtile);
+  SVGmap.appendChild(SVGbackgroundsymb);
+  SVGmap.appendChild(simulation["map"]);
+  document.rootElement.appendChild(SVGmap);
+
+  simulation["exec"].setAttributeNS(null, "transform", "translate(480, 0)");
+  SVGexec.appendChild(simulation["exec"]);
+  document.rootElement.appendChild(SVGexec);
 }
 
 function move()
