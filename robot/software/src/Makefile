@@ -1,5 +1,6 @@
 CC=avr-gcc
 CFLAGS=-Wall -Os -mcall-prologues -mmcu=atmega328
+#CFLAGS=-Wall -O3 -mmcu=atmega328
 LDFLAGS=
 OBJECTS=main.o comm.o step.o
 EXECUTABLE=code
@@ -9,16 +10,14 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-%.o:%.c
+%.o:%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.s:%.c
+%.s:%.c Makefile
 	$(CC) $(CFLAGS) -S $< -o $@
 
 %.ass:%.s
-	cat $<
+	less $<
 
 clean :
-	rm *.o
-	rm *.s
-	rm $(EXECUTABLE)
+	rm *.o *.s $(EXECUTABLE)

@@ -1,5 +1,5 @@
-#ifndef AVR_IO_H
-#define AVR_IO_H
+#ifndef DEF_H
+#define DEF_H
 
 #include <avr/io.h>
 #define STEP_OUT PORTD
