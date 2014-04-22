@@ -1,7 +1,8 @@
 CC=avr-gcc
-CFLAGS=-Wall -Os -mcall-prologues -mmcu=atmega328
+CFLAGS=-Wall -Os -mcall-prologues -mmcu=atmega328 -fshort-enums 
 #CFLAGS=-Wall -O3 -mmcu=atmega328
-LDFLAGS=
+LDFLAGS=-mmcu=atmega328 
+SOURCES=main.c comm.c step.c sqrt32.s
 OBJECTS=main.o comm.o step.o sqrt32.o
 EXECUTABLE=code
 
@@ -9,6 +10,7 @@ all: $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	avr-size $@
 
 %.o:%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
