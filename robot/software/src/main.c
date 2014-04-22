@@ -10,6 +10,5 @@ void initio(void)
 int main(void)
 {
   initio();
-
   while(1);
 } 

@@ -1,7 +1,6 @@
 CC=avr-gcc
-CFLAGS=-Wall -Os -mcall-prologues -mmcu=atmega328 -fshort-enums 
-#CFLAGS=-Wall -O3 -mmcu=atmega328
-LDFLAGS=-mmcu=atmega328 
+CFLAGS=-Wall -Wextra -Os -mcall-prologues -mmcu=atmega328 -fshort-enums -ffunction-sections -fdata-sections
+LDFLAGS=-mmcu=atmega328 -Wl,--gc-sections
 OBJECTS=main.o comm.o step.o sqrt32.o
 EXECUTABLE=code
 
