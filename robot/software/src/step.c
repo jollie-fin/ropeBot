@@ -3,8 +3,9 @@
 #include <stdint.h>
 #include "def.h"
 #include "step.h"
+#include "sqrt32.h"
 
-//length[i] is the final length of string i measure in motor step
+//length[i] is the current length of string i measure in motor step
 static int16_t _length[4];
 //offset[i] is the offset that is added to length[i] to obtain the motor curviline coordinate (actually, we just need the value modulo 4, but it is easier to debug this way)
 static int16_t _offset[4];
@@ -12,7 +13,10 @@ static int16_t _offset[4];
 //physical coordinates of motor-i
 static int16_t _coor_motor[4][2];
 
+//physical coordinates of robot
 static int16_t _coor_robot[2];
+
+//destination of robot
 static int16_t _coor_robot_dest[2];
 
 //dt, dcoor and error_coor are use for bresenham line algorithm
@@ -92,6 +96,34 @@ inline uint32_t get_timestamp()
 inline uint8_t is_moving()
 {
   return _moving;  
+}
+
+void init_movement()
+{
+  while (is_moving());
+
+  int16_t x = 458; //half size of table
+  _coor_motor[0][0] = 0;
+  _coor_motor[0][1] = 0;
+  _coor_motor[1][0] = x;
+  _coor_motor[1][1] = 0;
+  _coor_motor[2][0] = 0;
+  _coor_motor[2][1] = x;
+  _coor_motor[3][0] = x;
+  _coor_motor[3][1] = x;
+
+  _length[0] = 648;
+  _length[1] = 648;
+  _length[2] = 648;
+  _length[3] = 648;
+
+  _offset[0] = 0;
+  _offset[1] = 0;
+  _offset[2] = 0;
+  _offset[3] = 0;
+
+  _coor_robot[0] = 0;
+  _coor_robot[1] = 0;
 }
 
 void begin_movement(uint16_t xdest, uint16_t ydest, uint16_t duration)
