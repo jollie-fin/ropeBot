@@ -19,6 +19,8 @@ $(EXECUTABLE): $(OBJECTS)
 %.s:%.c Makefile
 	$(CC) $(CFLAGS) -S $< -o $@
 
+%.ass:%.s
+	less $<
 
 clean :
 	rm *.o *.s $(EXECUTABLE)

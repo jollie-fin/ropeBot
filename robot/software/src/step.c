@@ -26,10 +26,10 @@ static uint16_t time_left;
 
 void end_movement(void);
 
-__attribute__((optimize("O3")))
+//__attribute__((optimize("O3")))
 ISR(TIMER0_COMPA_vect)
 {
-  t++;
+  timestamp++;
   if (time_left == 0)
   {
     end_movement();
@@ -51,11 +51,24 @@ ISR(TIMER0_COMPA_vect)
       coor_robot[1]--;
   }
   
+  uint8_t i;
+  uint8_t out = 0;
 
-
-  int i;
   for (i = 0; i < 4; i++)
-    out |= (motor[i] % 4) << (i*2);
+  {
+    int16_t dx = coor_robot[0] - coor_motor[i][0];
+    int16_t dy = coor_robot[1] - coor_motor[i][1];
+    int32_t hypsq = dx*dx+dy*dy;
+    int16_t len = (length[i]+1);
+    int32_t lensq = len*len;
+    if (lensq <= hypsq)
+      length[i]++;
+    len = (length[i]-1);
+    lensq = len*len;
+    if (lensq >= hypsq)
+      length[i]--;
+    out |= (uint8_t) ((length[i]+offset[i]) % 4) << (i * 2);
+  }
 
   STEP_OUT = out;
 }
@@ -63,15 +76,21 @@ ISR(TIMER0_COMPA_vect)
 
 void end_movement(void)
 {
-  int i; 
+  uint8_t i; 
   for (i = 0; i < 4; i++)
   {
-    length[i] += 7*i;
-    dlength[i] += 2*i;
-    error[i] += 2*i;
-    motor[i] -= i;
-    dirmotor[i] += i;
-    dt--;
-    t++;
+    length[i]=2*i;
+    offset[i]=2*i;
+    coor_motor[i][0]=2*i;
+    coor_motor[i][1]=2*i;
   }
+
+  coor_robot[0]=timestamp;
+  coor_robot[1]=timestamp;
+  coor_robot_dest[0]=timestamp;
+  coor_robot_dest[1]=timestamp;
+
+  dcoor=timestamp;
+  dt=timestamp;
+  error_coor=timestamp;
 }
