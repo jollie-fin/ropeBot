@@ -1,6 +1,7 @@
 #ifndef STEP_H
 #define STEP_H
+#include <stdint.h>
 
-void next_destination(void); 
+extern uint32_t timestamp;
 
 #endif

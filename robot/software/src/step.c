@@ -1,55 +1,59 @@
 #include <avr/interrupt.h>
+#include <stdint.h>
 #include "def.h"
 #include "step.h"
 
 //length[i] is the final length of string i measure in motor step
-static int length[4];
+static int16_t length[4];
+//offset[i] is the offset that is added to length[i] to obtain the motor curviline coordinate (actually, we just need the value modulo 4, but it is easier to debug this way)
+static int16_t offset[4];
 
-//dlength[i] are used for Bresenham's line algorithm
-static int dlength[4];
+//physical coordinates of motor-i
+static int16_t coor_motor[4][2];
 
-//error[i] are used for Bresenham's line algorithm
-static int error[4];
+static int16_t coor_robot[2];
+static int16_t coor_robot_dest[2];
 
-//motor[i] is the real position of motor i. Since the position is only need modulo 4, a byte is enough
-static unsigned char motor[4];
-//dirmotor[i] is the direction in which the motor should move 
-static char dirmotor[4];
+//dt, dl and error_coor are use for bresenham line algorithm
+static int16_t dcoor;
+static int16_t dt;
+static int16_t error_coor;
 
-//dt is the increment use for 
-static int dt;
+//t is a timestamp
+uint32_t timestamp;
 
-//t is the time left for the rotation
-static int t;
+static uint16_t time_left;
+
+void end_movement(void);
 
 __attribute__((optimize("O3")))
 ISR(TIMER0_COMPA_vect)
 {
-  if (t == 0)
-    next_destination();
-  if (t == 0)
+  t++;
+  if (time_left == 0)
   {
-    t = -1;
+    end_movement();
     return;
   }
-  if (t == -1)
-  {
-    return;
-  }
+  time_left--;
 
-  t--;
-  int i;
-  for (i = 0; i < 4; i++)
+  error_coor -= dcoor;
+  if (error_coor < 0)
   {
-    error[i] -= dlength[i];
-    if (error[i] < 0)
-    {
-      motor[i] += dirmotor[i];
-      error[i] += dt;
-    }
+    error_coor += dt;
+    if (coor_robot[0] < coor_robot_dest[0])
+      coor_robot[0]++;
+    if (coor_robot[0] > coor_robot_dest[0])
+      coor_robot[0]--;
+    if (coor_robot[1] < coor_robot_dest[1])
+      coor_robot[1]++;
+    if (coor_robot[1] > coor_robot_dest[1])
+      coor_robot[1]--;
   }
-  unsigned char out = 0;
   
+
+
+  int i;
   for (i = 0; i < 4; i++)
     out |= (motor[i] % 4) << (i*2);
 
@@ -57,7 +61,7 @@ ISR(TIMER0_COMPA_vect)
 }
 
 
-void next_destination()
+void end_movement(void)
 {
   int i; 
   for (i = 0; i < 4; i++)
