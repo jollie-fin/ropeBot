@@ -100,7 +100,7 @@ inline uint8_t is_moving()
 
 void init_movement()
 {
-  while (is_moving());
+  while (_moving);
 
   int16_t x = 458; //half size of table
   _coor_motor[0][0] = 0;
@@ -128,7 +128,7 @@ void init_movement()
 
 void begin_movement(uint16_t xdest, uint16_t ydest, uint16_t duration)
 {
-  while (is_moving());
+  while (_moving);
 
   _coor_robot_dest[0] = xdest;
   _coor_robot_dest[1] = ydest;
