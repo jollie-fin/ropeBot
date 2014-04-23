@@ -23,6 +23,7 @@ static int16_t _coor_robot_dest[2];
 static int16_t _dcoor[2];
 static int16_t _dt;
 static int16_t _error[2];
+static int16_t _width;
 
 //t is a timestamp
 uint32_t _timestamp;
@@ -87,35 +88,41 @@ ISR(TIMER0_COMPA_vect)
   STEP_OUT = out;
 }
 
-inline uint32_t get_timestamp()
+inline uint32_t S_timestamp()
 {
   return _timestamp;  
 }
 
 
-inline uint8_t is_moving()
+inline uint8_t S_is_moving()
 {
   return _moving;  
 }
 
-void init_movement()
+inline uint16_t S_width()
+{
+  return _width;  
+}
+
+void S_init()
 {
   while (_moving);
 
   int16_t x = 458; //half size of table
-  _coor_motor[0][0] = 0;
-  _coor_motor[0][1] = 0;
-  _coor_motor[1][0] = x;
-  _coor_motor[1][1] = 0;
-  _coor_motor[2][0] = 0;
-  _coor_motor[2][1] = x;
-  _coor_motor[3][0] = x;
-  _coor_motor[3][1] = x;
-
-  _length[0] = 648;
-  _length[1] = 648;
-  _length[2] = 648;
-  _length[3] = 648;
+  int16_t m = 500;
+  _coor_motor[0][0] = -m;
+  _coor_motor[0][1] = -m;
+  _coor_motor[1][0] = m;
+  _coor_motor[1][1] = -m;
+  _coor_motor[2][0] = -m;
+  _coor_motor[2][1] = m;
+  _coor_motor[3][0] = m;
+  _coor_motor[3][1] = m;
+  _width = x*2;
+  _length[0] = 700;
+  _length[1] = 700;
+  _length[2] = 700;
+  _length[3] = 700;
 
   _offset[0] = 0;
   _offset[1] = 0;
@@ -126,7 +133,7 @@ void init_movement()
   _coor_robot[1] = 0;
 }
 
-void begin_movement(uint16_t xdest, uint16_t ydest, uint16_t duration)
+void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
 {
   while (_moving);
 
@@ -139,5 +146,18 @@ void begin_movement(uint16_t xdest, uint16_t ydest, uint16_t duration)
   _dcoor[0] = 2 * _coor_robot_dest[0] - _coor_robot[0];
   _dcoor[1] = 2 * _coor_robot_dest[1] - _coor_robot[1];
   _moving = 1;
+}
+
+void S_move_to(int16_t x, int16_t y, uint16_t duration)
+{
+  x *= 2;
+  y *= 2;
+  x -= 11;
+  y -= 11;
+  x *= _width;
+  y *= _width;
+  x /= 11;
+  y /= 11;
+  S_move_to_abs(x, y, duration);
 }
 

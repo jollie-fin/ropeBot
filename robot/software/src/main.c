@@ -4,7 +4,7 @@
 #include "step.h"
 #include "main.h"
 
-void initio(void)
+static void initio(void)
 {
   STEP_DDR = STEP_MASK;
   LED_DDR = LED_MASK;
@@ -17,9 +17,9 @@ void initio(void)
 
 int main(void)
 {
-  init_movement();
+  S_init();
   initio();
-  begin_movement(2,2,5);
-  begin_movement(2,2,5);
+  S_move_to(2,2,5);
+  S_move_to(2,2,5);
   while (1);
 } 
