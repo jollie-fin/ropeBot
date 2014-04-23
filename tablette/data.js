@@ -70,6 +70,8 @@ data.program.content = [
 
 
 data.level.ground = {"Black" : "I"};
+data.level.cost = {"F1" : 4, "R" : 6, "symbol" : 2, "color" : 1, "limit" : 2};
+
 data.program.start = {"x" : 6, "y" : 7, "d" : "up"};
 data.program.content = [
 ["F1",-1,"",""],

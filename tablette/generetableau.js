@@ -39,6 +39,24 @@ function transformfromprogram(start, p,width)
   var iteration = 0;
   var pc = 0;
 
+  var cost = function()
+  {
+    var i;
+    var ret = 0;
+    for (i = 0; i < p.length; i++)
+    {
+      if (p[i][0] in data.level.cost)
+        ret += data.level.cost[p[i][0]];
+      if (p[i][1] != -1)
+        ret += data.level.cost["limit"];
+      if (p[i][2] != "")
+        ret += data.level.cost["color"];
+      if (p[i][3] != "")
+        ret += data.level.cost["symbol"];
+    }
+    return ret;
+  }
+
   var iterate = function(x,y,dirangle,time)
   {
     rotate += ";" + dirangle + "," + offset + "," + offset;
@@ -340,14 +358,16 @@ function transformfromprogram(start, p,width)
   }
 
 
+
   var pctrans = "0,0";
   for (var i = 1; i < pcs.length; i++)
   {
     pctrans += "; 0," + pcs[i]*width/2.;
   }
   var pctransinit = "translate(0,0)";
+  var valcost = cost();
 
-  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit};
+  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit, "cost" : valcost};
 }
 
 
@@ -519,7 +539,14 @@ function createSimulation(start, p, width)
     grouppc.appendChild(text);
   }
 
-  simulation = {"map" : groupnale, "exec" : grouppc};
+  var textcost = 
+    createSVGobject("text",
+                     {"x": width/2. * .1,
+                      "y": width/2. * .95,
+                      "font-size": (width/2.*.9)+"px"});
+  textcost.textContent = t["cost"];
+
+  simulation = {"map" : groupnale, "exec" : grouppc, "cost" : textcost};
   return simulation;
 }
 
@@ -591,9 +618,19 @@ function createMap(width)
   SVGmap.appendChild(simulation["map"]);
   document.rootElement.appendChild(SVGmap);
 
-  simulation["exec"].setAttributeNS(null, "transform", "translate(480, 0)");
+  simulation["exec"].setAttributeNS(null, "transform", "translate(480, 40)");
+
   SVGexec.appendChild(simulation["exec"]);
   document.rootElement.appendChild(SVGexec);
+
+  var SVGcost =
+    createSVGobject("g",
+                     {"id" : "cost"});
+  simulation["cost"].setAttributeNS(null, "transform", "translate(480, 0)");
+  SVGcost.appendChild(simulation["cost"]);
+  document.rootElement.appendChild(SVGcost);
+
+
 }
 
 function move()
