@@ -3,6 +3,7 @@
 #include "def.h"
 #include "step.h"
 #include "main.h"
+#include "debug.h"
 
 static void initio(void)
 {
@@ -17,9 +18,10 @@ static void initio(void)
 
 int main(void)
 {
+  debug_init();
   S_init();
   initio();
-  S_move_to(2,2,5);
-  S_move_to(2,2,5);
-  while (1);
+  S_move_to(0,0,5000);
+  while(S_is_moving());
+  exit(0);
 } 

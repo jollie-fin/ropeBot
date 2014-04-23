@@ -1,9 +1,12 @@
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "def.h"
 #include "step.h"
 #include "sqrt32.h"
+
 
 //length[i] is the current length of string i measure in motor step
 static int16_t _length[4];
@@ -50,9 +53,10 @@ ISR(TIMER0_COMPA_vect)
     return;
   }
 
-  _delay--;
+  if (_delay > 0)
+    _delay--;
 
-  uint8_t i;
+  int i;
 
   for (i = 0; i < 2; i++)
   {
@@ -71,10 +75,10 @@ ISR(TIMER0_COMPA_vect)
 
   for (i = 0; i < 4; i++)
   {
-    int16_t dx = _coor_robot[0] - _coor_motor[i][0];
-    int16_t dy = _coor_robot[1] - _coor_motor[i][1];
+    int32_t dx = _coor_robot[0] - _coor_motor[i][0];
+    int32_t dy = _coor_robot[1] - _coor_motor[i][1];
     int32_t hypsq = dx*dx+dy*dy;
-    int16_t len = (_length[i]+1);
+    int32_t len = (_length[i]+1);
     int32_t lensq = len*len;
     if (lensq <= hypsq)
       _length[i]++;
@@ -119,10 +123,10 @@ void S_init()
   _coor_motor[3][0] = m;
   _coor_motor[3][1] = m;
   _width = x*2;
-  _length[0] = 700;
-  _length[1] = 700;
-  _length[2] = 700;
-  _length[3] = 700;
+  _length[0] = 707;
+  _length[1] = 707;
+  _length[2] = 707;
+  _length[3] = 707;
 
   _offset[0] = 0;
   _offset[1] = 0;
@@ -143,8 +147,8 @@ void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
   _error[0] = _delay;
   _error[1] = _delay;
   _dt = _delay * 2;
-  _dcoor[0] = 2 * _coor_robot_dest[0] - _coor_robot[0];
-  _dcoor[1] = 2 * _coor_robot_dest[1] - _coor_robot[1];
+  _dcoor[0] = 2 * abs(_coor_robot_dest[0] - _coor_robot[0]);
+  _dcoor[1] = 2 * abs(_coor_robot_dest[1] - _coor_robot[1]);
   _moving = 1;
 }
 
@@ -156,8 +160,8 @@ void S_move_to(int16_t x, int16_t y, uint16_t duration)
   y -= 11;
   x *= _width;
   y *= _width;
-  x /= 11;
-  y /= 11;
+  x /= 22;
+  y /= 22;
   S_move_to_abs(x, y, duration);
 }
 

@@ -1,13 +1,16 @@
 CC=avr-gcc
 CFLAGS=-Wall -Wextra -Os -mcall-prologues -mmcu=atmega328 -fshort-enums  -g -fuse-linker-plugin
 LDFLAGS=-mmcu=atmega328 -g -Os -fuse-linker-plugin
-OBJECTS=main.o comm.o step.o sqrt32.o
+OBJECTS=main.o comm.o step.o sqrt32.o debug.o
 EXECUTABLE=code
 
 all: $(EXECUTABLE)
 	
 doc:
 	okular ../doc/*pdf* 2> /dev/null > /dev/null &
+
+debug: $(EXECUTABLE)
+	simulavr -d atmega328 -f $< -W 0x20,- -R 0x22,- -T exit
 
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -flto
