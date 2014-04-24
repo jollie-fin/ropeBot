@@ -5,5 +5,6 @@
 #define DEBUG_OUT (*((volatile char *)0x20))
 
 void debug_init();
+void debug_print(const char *s);
 
 #endif
