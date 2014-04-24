@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "debug.h"
 
 #define TIME_THRESHOLD 3
 #define BUFFER_SIZE 50
@@ -44,6 +45,7 @@ inline void C_start_interrupt()
 __attribute__((optimize("O3")))
 ISR(TIMER2_COMPA_vect)
 {
+    debug_print("2\n");
   uint8_t adc = ADCL;
 
   if (ADCSRA & _BV(ADSC))

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "def.h"
+#include "debug.h"
 #include "step.h"
 #include "sqrt32.h"
 
@@ -29,26 +30,27 @@ static int16_t _error[2];
 static int16_t _width;
 
 //t is a timestamp
-static uint32_t _timestamp;
+int32_t _timestamp;
 
 //_delay is the minimal time of the movement of the robot
 static uint16_t _delay;
 //_moving = true if the movement is finished
 static volatile uint8_t _moving;
 
-inline void S_stop_timer()
+inline void S_stop_interrupt()
 {
-  TIMSK0 &= ~_BV(OCIE0A);
+  asm volatile("sts %0,__zero_reg__\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)));
 }
 
-inline void S_start_timer()
+inline void S_start_interrupt()
 {
-  TIMSK0 |= _BV(OCIE0A);
+  asm volatile("sts %0,%1\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)), "r" ((uint8_t) _BV(OCIE0A)));
 }
 
 __attribute__((optimize("O3"))) 
 ISR(TIMER0_COMPA_vect)
 {
+    debug_print("0\n");
   _timestamp++;
 
   if (!_moving)
@@ -101,25 +103,25 @@ ISR(TIMER0_COMPA_vect)
   STEP_OUT = out;
 }
 
-inline uint32_t S_timestamp()
+int32_t S_timestamp()
 {
   return _timestamp;  
 }
 
 
-inline uint8_t S_is_moving()
+uint8_t S_is_moving()
 {
   return _moving;  
 }
 
-inline uint16_t S_width()
+uint16_t S_width()
 {
   return _width;  
 }
 
 void S_init()
 {
-  S_stop_timer();
+  S_stop_interrupt();
   int16_t x = 458; //half size of table
   int16_t m = 500;
   _coor_motor[0][0] = -m;
@@ -143,13 +145,13 @@ void S_init()
 
   _coor_robot[0] = 0;
   _coor_robot[1] = 0;
-  S_start_timer();
+  S_start_interrupt();
 }
 
 void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
 {
   while (_moving);
-  S_stop_timer();
+  S_stop_interrupt();
   _coor_robot_dest[0] = xdest;
   _coor_robot_dest[1] = ydest;
   _delay = duration;
@@ -159,7 +161,7 @@ void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
   _dcoor[0] = 2 * abs(_coor_robot_dest[0] - _coor_robot[0]);
   _dcoor[1] = 2 * abs(_coor_robot_dest[1] - _coor_robot[1]);
   _moving = 1;
-  S_start_timer();
+  S_start_interrupt();
 }
 
 void S_move_to(int16_t x, int16_t y, uint16_t duration)
