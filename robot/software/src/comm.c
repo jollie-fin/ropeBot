@@ -18,8 +18,8 @@ static uint8_t _last_valid_value;
 static uint8_t _last_seen_value;
 static uint8_t _consecutive;
 static uint8_t _value_threshold[4] = {10,30,50,70};
-static uint32_t _timestamp;
-static uint32_t _last_timestamp;
+static uint32_t volatile _timestamp;
+static uint16_t _time_passed;
 static uint8_t _buffer[BUFFER_SIZE];
 static uint16_t _buffer_delay[BUFFER_SIZE];
 static uint8_t _buffer_index;
@@ -30,12 +30,12 @@ void C_init()
 {
 }
 
-inline void C_stop_interrupt()
+void C_stop_interrupt()
 {
   asm volatile("sts %0,__zero_reg__\n\t"::"M" (_SFR_MEM_ADDR(TIMSK2)));
 }
 
-inline void C_start_interrupt()
+void C_start_interrupt()
 {
   asm volatile("sts %0,%1\n\t"::"M" (_SFR_MEM_ADDR(TIMSK2)), "r" ((uint8_t) _BV(OCIE2A)));
 }
@@ -45,7 +45,8 @@ inline void C_start_interrupt()
 __attribute__((optimize("O3")))
 ISR(TIMER2_COMPA_vect)
 {
-    debug_print("2\n");
+  return;
+//    debug_print("2\n");
   uint8_t adc = ADCL;
 
   if (ADCSRA & _BV(ADSC))
@@ -58,6 +59,9 @@ ISR(TIMER2_COMPA_vect)
   }
 
   _timestamp++;
+  if (_time_passed < 65535u)
+    _time_passed++;
+
   uint8_t value_read = UNKNOWN;
   if (adc <= _value_threshold[0])
     value_read = ZERO;
@@ -91,17 +95,14 @@ ISR(TIMER2_COMPA_vect)
   {
     _last_valid_value = value_read;
     _buffer[_buffer_index] = value_read;
-
-    uint32_t dt = _timestamp - _last_timestamp;
-    if (dt > 65535)
-      dt = 65535;
-    _buffer_delay[_buffer_index] = dt;
+    
+    _buffer_delay[_buffer_index] = _time_passed;
 
     _buffer_index++;
     _buffer_index %= BUFFER_SIZE;
 
 
-    _last_timestamp = _timestamp;
+    _time_passed++;
   }
 }
 

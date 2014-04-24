@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <util/atomic.h>
 #include "def.h"
 #include "debug.h"
 #include "step.h"
@@ -29,20 +30,20 @@ static int16_t _dt;
 static int16_t _error[2];
 static int16_t _width;
 
-//t is a timestamp
-int32_t _timestamp;
+
+static volatile uint32_t _timestamp;
 
 //_delay is the minimal time of the movement of the robot
 static uint16_t _delay;
 //_moving = true if the movement is finished
 static volatile uint8_t _moving;
 
-inline void S_stop_interrupt()
+void S_stop_interrupt()
 {
   asm volatile("sts %0,__zero_reg__\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)));
 }
 
-inline void S_start_interrupt()
+void S_start_interrupt()
 {
   asm volatile("sts %0,%1\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)), "r" ((uint8_t) _BV(OCIE0A)));
 }
@@ -50,7 +51,6 @@ inline void S_start_interrupt()
 __attribute__((optimize("O3"))) 
 ISR(TIMER0_COMPA_vect)
 {
-    debug_print("0\n");
   _timestamp++;
 
   if (!_moving)
@@ -103,15 +103,25 @@ ISR(TIMER0_COMPA_vect)
   STEP_OUT = out;
 }
 
-int32_t S_timestamp()
+uint32_t S_timestamp()
 {
-  return _timestamp;  
+  uint32_t ret;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    ret = _timestamp;
+  }
+  return ret;  
 }
 
 
 uint8_t S_is_moving()
 {
-  return _moving;  
+  uint8_t ret;
+//  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) //atomic operation are not needed since _moving is simple byte
+  {
+    ret = _moving;
+  }
+  return ret;  
 }
 
 uint16_t S_width()

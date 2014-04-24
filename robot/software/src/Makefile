@@ -1,9 +1,9 @@
 CC=avr-gcc
 #CFLAGS=-Wall -Wextra -Os -mcall-prologues -mmcu=atmega328 -fshort-enums  -g -fuse-linker-plugin
 #LDFLAGS=-mmcu=atmega328 -g -Os -fuse-linker-plugin
-CFLAGS=-Wall -Wextra -O3 -mmcu=atmega328 -fshort-enums  -g 
+CFLAGS=-Wall -Wextra -O3 -mmcu=atmega328 -fshort-enums  -g  -fuse-linker-plugin -flto -std=gnu99
 LDFLAGS=-mmcu=atmega328 -g -O3 -fuse-linker-plugin -flto
-OBJECTS=main.o comm.o step.o sqrt32.o debug.o
+OBJECTS=main.o comm.o step.o debug.o
 EXECUTABLE=code
 
 all: $(EXECUTABLE)
@@ -15,11 +15,11 @@ debug: $(EXECUTABLE)
 	simulavr -d atmega328 -f $< -W 0x20,- -R 0x22,- -T exit
 
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -flto
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 	avr-size $@
 
 %.o:%.c Makefile
-	$(CC) $(CFLAGS) -c $< -o $@ -flto
+	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o:%.S Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -28,7 +28,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -S $< -o $@
 
 %.ass:%.c
-	avr-gcc -c -g -Wa,-a,-ad -O3 -mmcu=atmega328 $< | less
+	avr-gcc -c -g -Wa,-a,-ad -O3 -mmcu=atmega328  -std=gnu99 $< | less
 
 clean :
-	rm *.o *.s $(EXECUTABLE)
+	rm -f *.o *.s $(EXECUTABLE)

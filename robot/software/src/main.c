@@ -33,9 +33,7 @@ int main(void)
   
   while (S_timestamp() < 5l)
   {
-   ;
+
   }
- // S_move_to(0,0,5000);
-//  while(S_is_moving());
   exit(0);
 } 

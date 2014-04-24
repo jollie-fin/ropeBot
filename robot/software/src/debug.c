@@ -12,10 +12,10 @@ static FILE debug_out = FDEV_SETUP_STREAM(out_debug, NULL, _FDEV_SETUP_WRITE);
 
 void debug_print(const char *s)
 {
-  char c;
-  while(c=*s++)
+  while(*s)
   {
-    DEBUG_OUT = c;
+    DEBUG_OUT = *s;
+    s++;
   }
 }
 
