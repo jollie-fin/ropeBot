@@ -29,13 +29,22 @@ static int16_t _error[2];
 static int16_t _width;
 
 //t is a timestamp
-uint32_t _timestamp;
+static uint32_t _timestamp;
 
 //_delay is the minimal time of the movement of the robot
 static uint16_t _delay;
 //_moving = true if the movement is finished
 static volatile uint8_t _moving;
 
+inline void S_stop_timer()
+{
+  TIMSK0 &= ~_BV(OCIE0A);
+}
+
+inline void S_start_timer()
+{
+  TIMSK0 |= _BV(OCIE0A);
+}
 
 __attribute__((optimize("O3"))) 
 ISR(TIMER0_COMPA_vect)
@@ -110,8 +119,7 @@ inline uint16_t S_width()
 
 void S_init()
 {
-  while (_moving);
-
+  S_stop_timer();
   int16_t x = 458; //half size of table
   int16_t m = 500;
   _coor_motor[0][0] = -m;
@@ -135,12 +143,13 @@ void S_init()
 
   _coor_robot[0] = 0;
   _coor_robot[1] = 0;
+  S_start_timer();
 }
 
 void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
 {
   while (_moving);
-
+  S_stop_timer();
   _coor_robot_dest[0] = xdest;
   _coor_robot_dest[1] = ydest;
   _delay = duration;
@@ -150,6 +159,7 @@ void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
   _dcoor[0] = 2 * abs(_coor_robot_dest[0] - _coor_robot[0]);
   _dcoor[1] = 2 * abs(_coor_robot_dest[1] - _coor_robot[1]);
   _moving = 1;
+  S_start_timer();
 }
 
 void S_move_to(int16_t x, int16_t y, uint16_t duration)

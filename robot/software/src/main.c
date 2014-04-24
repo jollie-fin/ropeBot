@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <avr/interrupt.h>
 #include "def.h"
 #include "step.h"
@@ -12,7 +13,6 @@ static void initio(void)
   TCCR0A = _BV(WGM01);
   TCCR0B = _BV(CS00) | _BV(CS01);
   OCR0A = 250;
-  TIMSK0 = _BV(OCIE0A);
   sei();
 }
 
