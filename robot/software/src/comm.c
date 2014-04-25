@@ -1,9 +1,11 @@
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
+#include <util/atomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "debug.h"
+#include "comm.h"
 
 #define TIME_THRESHOLD 3
 #define BUFFER_SIZE 50
@@ -17,27 +19,36 @@ static uint8_t _last_read_value;
 static uint8_t _last_valid_value;
 static uint8_t _last_seen_value;
 static uint8_t _consecutive;
-static uint8_t _value_threshold[4] = {10,30,50,70};
+static uint8_t _value_threshold[4] = {'2','3','5','6'};
 static uint32_t volatile _timestamp;
 static uint16_t _time_passed;
-static uint8_t _buffer[BUFFER_SIZE];
-static uint16_t _buffer_delay[BUFFER_SIZE];
+static transition_t _buffer[BUFFER_SIZE];
 static uint8_t _buffer_index;
 
-
+void C_decode(uint8_t last_index);
 
 void C_init()
 {
 }
 
-void C_stop_interrupt()
+uint8_t C_buffer_orig(uint8_t i)
 {
-  asm volatile("sts %0,__zero_reg__\n\t"::"M" (_SFR_MEM_ADDR(TIMSK2)));
+  return _buffer[i].orig;
 }
 
-void C_start_interrupt()
+uint8_t C_buffer_dest(uint8_t i)
 {
-  asm volatile("sts %0,%1\n\t"::"M" (_SFR_MEM_ADDR(TIMSK2)), "r" ((uint8_t) _BV(OCIE2A)));
+  return _buffer[i].dest;
+}
+
+uint16_t C_buffer_delay(uint8_t i)
+{
+  uint16_t delay;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    delay = _buffer[i].delay;
+  }
+  return delay;
 }
 
 
@@ -45,10 +56,9 @@ void C_start_interrupt()
 __attribute__((optimize("O3")))
 ISR(TIMER2_COMPA_vect)
 {
-  return;
 //    debug_print("2\n");
-  uint8_t adc = ADCL;
 
+/*  uint8_t adc = ADCL;
   if (ADCSRA & _BV(ADSC))
     adc = _last_read_value;
   else
@@ -56,7 +66,11 @@ ISR(TIMER2_COMPA_vect)
     adc = ADCL;
     ADCSRA |= ADSC; //start again a conversion
     _last_read_value = adc;
-  }
+  }*/
+
+  uint8_t adc;
+  adc = DEBUG_IN;
+  _last_read_value = adc;
 
   _timestamp++;
   if (_time_passed < 65535u)
@@ -93,18 +107,27 @@ ISR(TIMER2_COMPA_vect)
   
   if (value_read != _last_valid_value)
   {
+    _buffer[_buffer_index].orig = _last_valid_value;
+    _buffer[_buffer_index].dest = value_read;
+    _buffer[_buffer_index].delay = _time_passed;
+
     _last_valid_value = value_read;
-    _buffer[_buffer_index] = value_read;
-    
-    _buffer_delay[_buffer_index] = _time_passed;
 
     _buffer_index++;
     _buffer_index %= BUFFER_SIZE;
-
-
-    _time_passed++;
+    _time_passed = 0u;
+    if (value_read == HIZ)
+    {
+      C_decode(_buffer_index);
+    }
   }
 }
 
 
+
+void C_decode(uint8_t last_index)
+{
+
+
+}
 

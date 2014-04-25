@@ -38,15 +38,6 @@ static uint16_t _delay;
 //_moving = true if the movement is finished
 static volatile uint8_t _moving;
 
-void S_stop_interrupt()
-{
-  asm volatile("sts %0,__zero_reg__\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)));
-}
-
-void S_start_interrupt()
-{
-  asm volatile("sts %0,%1\n\t"::"M" (_SFR_MEM_ADDR(TIMSK0)), "r" ((uint8_t) _BV(OCIE0A)));
-}
 
 __attribute__((optimize("O3"))) 
 ISR(TIMER0_COMPA_vect)
@@ -131,47 +122,49 @@ uint16_t S_width()
 
 void S_init()
 {
-  S_stop_interrupt();
-  int16_t x = 458; //half size of table
-  int16_t m = 500;
-  _coor_motor[0][0] = -m;
-  _coor_motor[0][1] = -m;
-  _coor_motor[1][0] = m;
-  _coor_motor[1][1] = -m;
-  _coor_motor[2][0] = -m;
-  _coor_motor[2][1] = m;
-  _coor_motor[3][0] = m;
-  _coor_motor[3][1] = m;
-  _width = x*2;
-  _length[0] = 707;
-  _length[1] = 707;
-  _length[2] = 707;
-  _length[3] = 707;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    int16_t x = 458; //half size of table
+    int16_t m = 500;
+    _coor_motor[0][0] = -m;
+    _coor_motor[0][1] = -m;
+    _coor_motor[1][0] = m;
+    _coor_motor[1][1] = -m;
+    _coor_motor[2][0] = -m;
+    _coor_motor[2][1] = m;
+    _coor_motor[3][0] = m;
+    _coor_motor[3][1] = m;
+    _width = x*2;
+    _length[0] = 707;
+    _length[1] = 707;
+    _length[2] = 707;
+    _length[3] = 707;
 
-  _offset[0] = 0;
-  _offset[1] = 0;
-  _offset[2] = 0;
-  _offset[3] = 0;
+    _offset[0] = 0;
+    _offset[1] = 0;
+    _offset[2] = 0;
+    _offset[3] = 0;
 
-  _coor_robot[0] = 0;
-  _coor_robot[1] = 0;
-  S_start_interrupt();
+    _coor_robot[0] = 0;
+    _coor_robot[1] = 0;
+  }
 }
 
 void S_move_to_abs(int16_t xdest, int16_t ydest, uint16_t duration)
 {
   while (_moving);
-  S_stop_interrupt();
-  _coor_robot_dest[0] = xdest;
-  _coor_robot_dest[1] = ydest;
-  _delay = duration;
-  _error[0] = _delay;
-  _error[1] = _delay;
-  _dt = _delay * 2;
-  _dcoor[0] = 2 * abs(_coor_robot_dest[0] - _coor_robot[0]);
-  _dcoor[1] = 2 * abs(_coor_robot_dest[1] - _coor_robot[1]);
-  _moving = 1;
-  S_start_interrupt();
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    _coor_robot_dest[0] = xdest;
+    _coor_robot_dest[1] = ydest;
+    _delay = duration;
+    _error[0] = _delay;
+    _error[1] = _delay;
+    _dt = _delay * 2;
+    _dcoor[0] = 2 * abs(_coor_robot_dest[0] - _coor_robot[0]);
+    _dcoor[1] = 2 * abs(_coor_robot_dest[1] - _coor_robot[1]);
+    _moving = 1;
+  }
 }
 
 void S_move_to(int16_t x, int16_t y, uint16_t duration)

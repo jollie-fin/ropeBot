@@ -12,7 +12,7 @@ doc:
 	okular ../doc/*pdf* 2> /dev/null > /dev/null &
 
 debug: $(EXECUTABLE)
-	simulavr -d atmega328 -f $< -W 0x20,- -R 0x22,- -T exit
+	simulavr -d atmega328 -f $< -W 0x20,- -R 0x22,adcin -T exit
 
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
