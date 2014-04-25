@@ -21,14 +21,16 @@ int main(int argc, char **argv)
   
   wave(sleep, '4');
 
-  for (unsigned i = 0; i < strlen(argv[3])/4; i++)
+  int len = strlen(argv[3])/4;
+
+  for (int i = 0; i < len; i++)
   {
     wave(period, '1');
     wave(period, '7');
     wave(period, '1');
     wave(period, '7');
-    unsigned long byte = 0;
-    for (unsigned j = i*4; j < i*4+4; i++)
+    unsigned byte = 0;
+    for (int j = i*4; j < i*4+4; j++)
     {
       if (argv[3][j] >= '0' && argv[3][j] <= '9')
         byte = (byte << 4) | (argv[3][j] - '0');
@@ -39,11 +41,12 @@ int main(int argc, char **argv)
       else
         byte = 0;
     }
+
     int parity = 0;
     int last_bit = 1;
-    for (unsigned j = 0; j < 16; j++)
+    for (int j = 15; j >= 0; j--)
     {
-      unsigned bit = byte & (1 << j);
+      unsigned bit = (byte>>j) & 1;
       if (bit == 0)
       {
         last_bit = 1-last_bit;

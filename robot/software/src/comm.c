@@ -54,7 +54,10 @@ ISR(TIMER2_COMPA_vect)
   uint8_t adc;
   adc = DEBUG_IN;
   if (adc == ' ')
+  {
+    printf("%x\n", _data);
     exit(0);
+  }
   _last_read_value = adc;
 
   _timestamp++;
@@ -94,11 +97,6 @@ ISR(TIMER2_COMPA_vect)
   {
     uint8_t orig = _last_valid_value;
     uint8_t dest = value_read;
-    DEBUG_OUT = '\n';
-    DEBUG_OUT = '0' + orig;   
-    DEBUG_OUT = '0' + dest;
-    if(_time_passed < 26)
-      DEBUG_OUT = 'a' + _time_passed;
     if (orig == HIZ)
     {
       _no_bit = 0;
@@ -142,15 +140,7 @@ ISR(TIMER2_COMPA_vect)
           _data |= bit;
         }
       }
-      DEBUG_OUT = ' ';
-      DEBUG_OUT = '0' + bit;   
     }
-    if (dest == HIZ && _no_bit < 38)
-      DEBUG_OUT = 'K';
-    if (dest == HIZ && _no_bit == 38)
-      DEBUG_OUT = _parity + 'A';
-    if ((_no_bit == 38 && dest != HIZ) || _no_bit > 38)
-      DEBUG_OUT = 'L';
 
     _last_valid_value = value_read;
 
