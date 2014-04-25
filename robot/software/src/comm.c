@@ -10,45 +10,28 @@
 #define TIME_THRESHOLD 3
 #define BUFFER_SIZE 50
 
-#define ZERO 1
-#define ONE 2
+#define ZERO 0
+#define ONE 1
 #define HIZ 3
-#define UNKNOWN 0
+#define UNKNOWN 2
 
-static uint8_t _last_read_value;
-static uint8_t _last_valid_value;
-static uint8_t _last_seen_value;
+static uint8_t _last_read_value = UNKNOWN;
+static uint8_t _last_valid_value = UNKNOWN;
+static uint8_t _last_seen_value = UNKNOWN;
 static uint8_t _consecutive;
 static uint8_t _value_threshold[4] = {'2','3','5','6'};
 static uint32_t volatile _timestamp;
 static uint16_t _time_passed;
-static transition_t _buffer[BUFFER_SIZE];
-static uint8_t _buffer_index;
+static uint16_t _data;
+static uint8_t _no_bit;
+static uint16_t _thres;
+static uint8_t _parity;
 
 void C_decode(uint8_t last_index);
 
 void C_init()
 {
-}
-
-uint8_t C_buffer_orig(uint8_t i)
-{
-  return _buffer[i].orig;
-}
-
-uint8_t C_buffer_dest(uint8_t i)
-{
-  return _buffer[i].dest;
-}
-
-uint16_t C_buffer_delay(uint8_t i)
-{
-  uint16_t delay;
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-  {
-    delay = _buffer[i].delay;
-  }
-  return delay;
+  _thres = 12u;
 }
 
 
@@ -70,6 +53,8 @@ ISR(TIMER2_COMPA_vect)
 
   uint8_t adc;
   adc = DEBUG_IN;
+  if (adc == ' ')
+    exit(0);
   _last_read_value = adc;
 
   _timestamp++;
@@ -92,7 +77,7 @@ ISR(TIMER2_COMPA_vect)
   }
 
 
-  if (!value_read)
+  if (value_read == UNKNOWN)
     return;
 
   if (_consecutive == TIME_THRESHOLD)
@@ -107,27 +92,79 @@ ISR(TIMER2_COMPA_vect)
   
   if (value_read != _last_valid_value)
   {
-    _buffer[_buffer_index].orig = _last_valid_value;
-    _buffer[_buffer_index].dest = value_read;
-    _buffer[_buffer_index].delay = _time_passed;
+    uint8_t orig = _last_valid_value;
+    uint8_t dest = value_read;
+    DEBUG_OUT = '\n';
+    DEBUG_OUT = '0' + orig;   
+    DEBUG_OUT = '0' + dest;
+    if(_time_passed < 26)
+      DEBUG_OUT = 'a' + _time_passed;
+    if (orig == HIZ)
+    {
+      _no_bit = 0;
+      _thres = 0;
+      _data = 0u;
+      _parity = 0u;
+    }
+    else if (_no_bit < 4)
+    {
+      _thres+=_time_passed;
+      _no_bit++;
+    }
+    else
+    {
+      if (_no_bit == 4)
+      {
+        _thres *= 3;
+        _thres /= 8;
+      }
+
+      uint8_t bit = HIZ;
+      if (_time_passed > _thres)
+      {
+        //BMC : http://en.wikipedia.org/wiki/Differential_Manchester_encoding
+        //zero
+        _no_bit+=2;
+        bit = 0;
+      }
+      else
+      {
+        _no_bit++;
+        if (_no_bit %2 == 0)
+          bit = 1;
+      }
+      if (bit != HIZ)
+      {
+        _parity ^= bit;
+        if (_no_bit <= 36)
+        {
+          _data <<= 1;
+          _data |= bit;
+        }
+      }
+      DEBUG_OUT = ' ';
+      DEBUG_OUT = '0' + bit;   
+    }
+    if (dest == HIZ && _no_bit < 38)
+      DEBUG_OUT = 'K';
+    if (dest == HIZ && _no_bit == 38)
+      DEBUG_OUT = _parity + 'A';
+    if ((_no_bit == 38 && dest != HIZ) || _no_bit > 38)
+      DEBUG_OUT = 'L';
 
     _last_valid_value = value_read;
 
-    _buffer_index++;
-    _buffer_index %= BUFFER_SIZE;
     _time_passed = 0u;
-    if (value_read == HIZ)
-    {
-      C_decode(_buffer_index);
-    }
   }
 }
 
-
-
-void C_decode(uint8_t last_index)
+uint32_t C_timestamp()
 {
-
-
+  uint32_t ret;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+  {
+    ret = _timestamp;
+  }
+  return ret;  
 }
 

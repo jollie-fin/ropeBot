@@ -34,17 +34,9 @@ int main(void)
   C_init();
   initio();
 
-  while (S_timestamp() < 5lu)
+  while (C_timestamp() < 500lu)
   {
 
-  }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-  {
-    uint8_t i;
-    for (i = 0; i < 50; i++)
-    {
-      printf("%u -> %u : %u\n", C_buffer_orig(i), C_buffer_dest(i), C_buffer_delay(i));
-    }
   }
   exit(0);
 } 
