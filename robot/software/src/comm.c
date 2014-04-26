@@ -39,8 +39,6 @@ void C_init()
 __attribute__((optimize("O3")))
 ISR(TIMER2_COMPA_vect)
 {
-//    debug_print("2\n");
-
 /*  uint8_t adc = ADCL;
   if (ADCSRA & _BV(ADSC))
     adc = _last_read_value;
@@ -50,12 +48,10 @@ ISR(TIMER2_COMPA_vect)
     ADCSRA |= ADSC; //start again a conversion
     _last_read_value = adc;
   }*/
-
   uint8_t adc;
   adc = DEBUG_IN;
   if (adc == ' ')
   {
-    printf("%x\n", _data);
     exit(0);
   }
   _last_read_value = adc;
@@ -97,6 +93,10 @@ ISR(TIMER2_COMPA_vect)
   {
     uint8_t orig = _last_valid_value;
     uint8_t dest = value_read;
+
+    if (orig == UNKNOWN)
+    {
+    }
     if (orig == HIZ)
     {
       _no_bit = 0;
@@ -141,7 +141,25 @@ ISR(TIMER2_COMPA_vect)
         }
       }
     }
+    if (dest == HIZ && orig != UNKNOWN)
+    {
+      if (_parity == 0 && _no_bit == 38)
+      {
+        DEBUG_OUT = 'K';
+        print_hex(_data);
+      }
 
+      if (_parity != 0 && _no_bit == 38)
+        DEBUG_OUT = 'P';
+
+      if (_no_bit < 38)
+        DEBUG_OUT = 'L';
+
+      if (_no_bit > 38)
+        DEBUG_OUT = 'H';
+
+      DEBUG_OUT = ' ';
+    }
     _last_valid_value = value_read;
 
     _time_passed = 0u;

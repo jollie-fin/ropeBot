@@ -34,7 +34,7 @@ int main(void)
   C_init();
   initio();
 
-  while (C_timestamp() < 500lu)
+  while (1)
   {
 
   }
