@@ -3,32 +3,46 @@
 #include <string.h>
 #include <time.h>
 
-void wave(unsigned length, char c)
+void wave(unsigned length, unsigned jitter, unsigned noise, char c)
 {
-  for (unsigned i = 0; i < length; i++)
-    putchar(c);
+  unsigned jit = rand()/(RAND_MAX/(2*jitter+1))-1;
+  for (unsigned i = 0; i < length+jit; i++)
+  {
+    unsigned n = rand()/(RAND_MAX/100);
+    if (n < noise)
+    {
+      unsigned val = rand()/(RAND_MAX/6);
+      putchar('1' + val);
+    }
+    else
+    {
+      putchar(c);
+    }
+  }
 }
 
 int main(int argc, char **argv)
 {
   srand(time(NULL));
 
-  if (argc != 4)
+  if (argc != 6)
     return 1;
 
   unsigned period = atoi(argv[1]);
   unsigned sleep = atoi(argv[2]);
+  unsigned jitter = (atoi(argv[4])*period)/100u;
+  unsigned noise = atoi(argv[5]);
   
-  wave(sleep, '4');
+  wave(sleep, 0, noise, '4');
 
   int len = strlen(argv[3])/4;
 
   for (int i = 0; i < len; i++)
   {
-    wave(period, '1');
-    wave(period, '7');
-    wave(period, '1');
-    wave(period, '7');
+    wave(period, jitter, noise, '1');
+    wave(period, jitter, noise, '7');
+    wave(period, jitter, noise, '1');
+    wave(period, jitter, noise, '7');
     unsigned byte = 0;
     for (int j = i*4; j < i*4+4; j++)
     {
@@ -50,28 +64,28 @@ int main(int argc, char **argv)
       if (bit == 0)
       {
         last_bit = 1-last_bit;
-        wave(period*2, (last_bit) ? '7' : '1');
+        wave(period*2, jitter*2, noise, (last_bit) ? '7' : '1');
       }
       else
       {
         parity = 1-parity;
-         wave(period, (last_bit) ? '1' : '7');
-         wave(period, (last_bit) ? '7' : '1');
+         wave(period, jitter, noise, (last_bit) ? '1' : '7');
+         wave(period, jitter, noise, (last_bit) ? '7' : '1');
       }
     }
     if (parity == 0)
     {
       last_bit = 1-last_bit;
-      wave(period*2, (last_bit) ? '7' : '1');
+      wave(period*2, jitter*2, noise, (last_bit) ? '7' : '1');
     }
     else
     {
       parity = 1-parity;
-       wave(period, (last_bit) ? '1' : '7');
-       wave(period, (last_bit) ? '7' : '1');
+       wave(period, jitter, noise, (last_bit) ? '1' : '7');
+       wave(period, jitter, noise, (last_bit) ? '7' : '1');
     }
 
-    wave(sleep, '4');
+    wave(sleep, 0, noise, '4');
   }
   putchar(' ');
   return 0;
