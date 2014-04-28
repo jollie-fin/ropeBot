@@ -45,7 +45,10 @@ function transformfromprogram(start, p,width)
     var ret = 0;
     for (i = 0; i < p.length; i++)
     {
-      if (p[i][0] in data.level.cost)
+      base = p[i][0];
+      if (p[i][0][0] != "F" || p[i][0][0] != "B")
+        base = p[i][0][0];
+      if (base in data.level.cost)
         ret += data.level.cost[p[i][0]];
       if (p[i][1] != -1)
         ret += data.level.cost["limit"];
