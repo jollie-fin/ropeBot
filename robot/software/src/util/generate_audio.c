@@ -88,6 +88,7 @@ int main(int argc, char **argv)
     wave(sleep, 0, noise, '4');
   }
   putchar(' ');
+  wave(150, 0, 0, '4');
   return 0;
 }
 
