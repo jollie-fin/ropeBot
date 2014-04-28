@@ -15,41 +15,33 @@
 #define HIZ 3
 #define UNKNOWN 2
 
-static volatile uint8_t _fifo_first;
+static uint8_t _fifo_first;
 static volatile uint8_t _fifo_last;
-static uint8_t _buffer[BUFFER_SIZE];
-static uint8_t _last_read_value = UNKNOWN;
-static uint8_t _last_valid_value = UNKNOWN;
-static uint8_t _last_seen_value = UNKNOWN;
-static uint8_t _consecutive;
+static volatile uint8_t _buffer[BUFFER_SIZE];
 static uint8_t _value_threshold[4] = {'2','3','5','6'};
-static uint16_t _time_passed;
-static uint16_t _data;
-static uint8_t _no_bit;
-static uint16_t _thres;
-static uint8_t _parity;
 
-void C_decode(uint8_t last_index);
-
+void C_decode();
+static void do_something_with_data(uint16_t);
 void C_init()
 {
-  _thres = 12u;
 }
 
-
+#define ADC_vect_C 1
 #ifdef ADC_vect_C
 __attribute__((optimize("O3")))
-ISR(ADC_vect)
+//ISR(ADC_vect)
+ISR(TIMER2_COMPA_vect)
 {
   uint8_t next_fifo_last = (uint8_t) (_fifo_last+1)%BUFFER_SIZE;
   if (next_fifo_last == _fifo_first)
     return;
   _fifo_last=next_fifo_last;   
-  _buffer[_fifo_last] = ADCL;
+  _buffer[_fifo_last] = DEBUG_IN;
 }
 #else
 //36 cycles vs 50cycles
-ISR(ADC_vect, ISR_NAKED)
+ISR(TIMER2_COMPA_vect, ISR_NAKED)
+//ISR(ADC_vect, ISR_NAKED)
 {
 #if BUFFER_SIZE != 64
 #error "ISR(ADC_vect) was designed to work with BUFFER_SIZE == 64"
@@ -92,130 +84,141 @@ ISR(ADC_vect, ISR_NAKED)
   "/*restore SREG*/\n\t"
 	"out __SREG__,r0\n\t"
 	"pop r0\n\t"
-	"reti\n\t"::"M" (_SFR_MEM_ADDR(ADCL)));
+	"reti\n\t"
+//  ::"M" (_SFR_MEM_ADDR(ADCL)));
+  ::"M" (0x22));
 }
 #endif
 
-/*
+void C_decode()
 {
-  uint8_t adc;
-  adc = DEBUG_IN;
-  if (adc == ' ')
+  static uint16_t _thres;
+  static uint8_t _consecutive;
+  static uint16_t _time_passed;
+  static uint16_t _data;
+  static uint8_t _no_bit;
+  static uint8_t _parity;
+  static uint8_t _last_valid_value = UNKNOWN;
+  static uint8_t _last_seen_value = UNKNOWN;
+  while (_fifo_first != _fifo_last)
   {
-    exit(0);
-  }
-  _last_read_value = adc;
+    uint8_t adc;
+    adc = _buffer[_fifo_first];
+    _fifo_first = (_fifo_first+1) % BUFFER_SIZE;
 
-  _timestamp++;
-  if (_time_passed < 65535u)
-    _time_passed++;
-
-  uint8_t value_read = UNKNOWN;
-  if (adc <= _value_threshold[0])
-    value_read = ZERO;
-  else if (adc >= _value_threshold[1] && adc <= _value_threshold[2])
-    value_read = HIZ;
-  else if (adc >= _value_threshold[3])
-    value_read = ONE;
-
-  if (value_read != _last_seen_value)
-  {
-    _last_seen_value = value_read;
-    _consecutive = 0;
-    return;
-  }
-
-
-  if (value_read == UNKNOWN)
-    return;
-
-  if (_consecutive == TIME_THRESHOLD)
-    return;
-
-  _consecutive++;
-  
-  if (_consecutive < TIME_THRESHOLD)
-    return;
-  
-  //this point, value_read correspond to the input value with strong guarantee
-  
-  if (value_read != _last_valid_value)
-  {
-    uint8_t orig = _last_valid_value;
-    uint8_t dest = value_read;
-
-    if (orig == UNKNOWN)
+    if (adc == ' ')
     {
+      exit(0);
     }
-    if (orig == HIZ)
+
+#if 1
+
+    if (_time_passed < 65535u) /*time passed since last reset*/
+      _time_passed++;
+
+    uint8_t value_read = UNKNOWN;
+    if (adc <= _value_threshold[0]) /*detection of value in respect to threshold*/
+      value_read = ZERO;
+    else if (adc >= _value_threshold[1] && adc <= _value_threshold[2])
+      value_read = HIZ;
+    else if (adc >= _value_threshold[3])
+      value_read = ONE;
+
+    if (value_read != _last_seen_value) /*value not stabilized*/
     {
-      _no_bit = 0;
-      _thres = 0;
-      _data = 0u;
-      _parity = 0u;
+      _last_seen_value = value_read;
+      _consecutive = 0;
+      continue;
     }
-    else if (_no_bit < 4)
+
+    if (value_read == UNKNOWN) /*value out of confidence limit*/
+      continue;
+
+    if (_consecutive < TIME_THRESHOLD) /*increment _consecutive*/
+      _consecutive++;
+  
+    if (_consecutive < TIME_THRESHOLD) /*not enough coherent value*/
+      continue;
+  
+    /*at this point, value_read correspond to the input value with strong guarantee*/
+  
+    if (value_read != _last_valid_value && _last_valid_value != UNKNOWN) /*it is a meaningful transition*/
     {
-      _thres+=_time_passed;
-      _no_bit++;
-    }
-    else
-    {
-      if (_no_bit == 4)
+      uint8_t orig = _last_valid_value;
+      uint8_t dest = value_read;
+
+      if (orig == HIZ) /*begining of a new pulsetrain*/
       {
-        _thres *= 3;
-        _thres /= 8;
+        _no_bit = 0;
+        _thres = 0;
+        _data = 0u;
+        _parity = 0u;
       }
-
-      uint8_t bit = HIZ;
-      if (_time_passed > _thres)
+      else if (_no_bit < 4) /*synchronisation*/
       {
-        //BMC : http://en.wikipedia.org/wiki/Differential_Manchester_encoding
-        //zero
-        _no_bit+=2;
-        bit = 0;
+        _thres+=_time_passed;
+        _no_bit++;
       }
       else
       {
-        _no_bit++;
-        if (_no_bit %2 == 0)
-          bit = 1;
-      }
-      if (bit != HIZ)
-      {
+        /*BMC : http://en.wikipedia.org/wiki/Differential_Manchester_encoding*/
+        if (_no_bit == 4) /*computing time threshold for bit detection*/
+        {
+          _thres *= 3;
+          _thres /= 8;
+        }
+
+        uint8_t bit = HIZ;
+        if (_time_passed > _thres)
+        {
+          /*zero*/
+          _no_bit+=2;
+          bit = 0;
+        }
+        else
+        {
+          /*one*/
+          _no_bit++;
+          if (_no_bit %2 == 0)
+            bit = 1;
+        }
+
         _parity ^= bit;
-        if (_no_bit <= 36)
+        if (_no_bit <= 36) /*if it isn't the parity bit, add bit to value*/
         {
           _data <<= 1;
           _data |= bit;
         }
       }
-    }
-    if (dest == HIZ && orig != UNKNOWN)
-    {
-      if (_parity == 0 && _no_bit == 38)
+      if (dest == HIZ && orig != UNKNOWN)
       {
-        DEBUG_OUT = 'K';
-        print_hex(_data);
+        if (_parity == 0 && _no_bit == 38) /*correct value*/
+        {
+          DEBUG_OUT = 'K';
+          print_hex(_data);
+          do_something_with_data(_data);
+        }
+
+        if (_parity != 0 && _no_bit == 38) /*bad parity bit (inversion 0 and 1?)*/
+          DEBUG_OUT = 'P';
+
+        if (_no_bit < 38) /*pulse train too short*/
+          DEBUG_OUT = 'L';
+
+        if (_no_bit > 38)
+          DEBUG_OUT = 'H';/*pulse train too long*/
+
+        DEBUG_OUT = ' ';
       }
-
-      if (_parity != 0 && _no_bit == 38)
-        DEBUG_OUT = 'P';
-
-      if (_no_bit < 38)
-        DEBUG_OUT = 'L';
-
-      if (_no_bit > 38)
-        DEBUG_OUT = 'H';
-
-      DEBUG_OUT = ' ';
+      _time_passed = 0u;
     }
     _last_valid_value = value_read;
-
-    _time_passed = 0u;
   }
+#endif
+
 }
-*/
+
+
 uint32_t C_timestamp()
 {
   uint32_t ret;
@@ -226,3 +229,7 @@ uint32_t C_timestamp()
   return ret;  
 }
 
+static void do_something_with_data(uint16_t data)
+{
+
+}
