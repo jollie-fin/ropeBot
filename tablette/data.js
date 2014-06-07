@@ -70,12 +70,11 @@ data.program.content = [
 
 
 data.level.ground = {"Black" : "I"};
-data.level.cost = {"F1" : 4, "R" : 6, "symbol" : 2, "color" : 1, "limit" : 2};
+data.level.cost = {"F1" : 2, "B1" : 1, "L" : 2 , "R" : 1, "limit" : 2};
 
-data.program.start = {"x" : 6, "y" : 7, "d" : "up"};
+data.program.start = {"x" : 3, "y" : 7, "d" : "left"};
 data.program.content = [
 ["F1",-1,"",""],
-["R",-1,"",""],
 ["R",-1,"",""],
 ["G1",-1,"",""],
 ["1",-1,"",""],
@@ -86,7 +85,7 @@ data.program.content = [
 ["F1",-1,"",""],
 ["R",-1,"",""],
 ["N",-1,"",""],
-["F1",-1,"",""]];//*/
+["F1",-1,"",""]];
 
 data.map = {};
 data.map.color = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
