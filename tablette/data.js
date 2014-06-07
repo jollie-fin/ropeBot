@@ -89,11 +89,13 @@ data.program.content = [
 
 data.map = {};
 data.map.color = {"Orange" : "rgb(255, 141, 0)", "Red" : "rgb(255,0,0)", "White" : "rgb(255,255,255)", "Blue" : "rgb(0,0,196)", "Cyan" : "rgb(54, 247, 255)", "Grey" : "rgb(185, 185, 185)", "Purple" : "rgb(133, 49, 109)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(255, 93, 141)", "Yellow" : "rgb(255, 241, 43)", "Green" : "rgb(0, 245, 4)"};
-data.map.symbcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
+data.map.symbcolor = {"Orange" : "rgb(0, 0, 0)", "Red" : "rgb(0, 0, 0)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(0, 0, 0)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(0, 0, 0)", "Purple" : "rgb(0, 0, 0)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
+data.map.symbbngcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(255, 255, 255)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(255, 255, 255)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(255, 255, 255)", "Yellow" : "rgb(255, 255, 255)", "Green" : "rgb(255, 255, 255)"};
 data.map.symb = {"C" : "circle", "R" : "square", "T" : "triangle", "S" : "star"};
 data.map.ground = {"S" : "sand", "A" : "space", "I" : "ice", "W" : "wall", "L" : "lava"};
 
 data.map.colordefault = "rgb(0,0,255)";
-data.map.symbcolordefault = "rgb(255,255,255)";
+data.map.symbcolordefault = "rgb(0,0,0)";
+data.map.symbbngcolordefault = "rgb(255,255,255)";
 data.map.direction = {"up" : 0, "left" : 3, "down" : 2, "right" : 1};
 

@@ -590,17 +590,26 @@ function createMap(width)
     for (var j=0; j<12; j++)
     {
       var color = data.map.symbcolordefault;
+      var bngcolor = data.map.symbbngcolordefault;
       if (data.level.background[i][j] in data.map.symbcolor)
         color = data.map.symbcolor[data.level.background[i][j]];
-
+      if (data.level.background[i][j] in data.map.symbbngcolor)
+        bngcolor = data.map.symbbngcolor[data.level.background[i][j]];
+        
       if (data.level.symb[i][j] in data.map.symb)
       {
         var symbole = createSymbole(width,data.map.symb[data.level.symb[i][j]]);
         if (symbole !== undefined)
         {
-          symbole.setAttributeNS(null, "transform", "translate("+(width*j)+","+(width*i)+")");
+          var symbolebng = symbole.cloneNode(true);
+          symbolebng.setAttributeNS(null, "transform", "translate("+(width*j)+","+(width*i)+")");
+          symbolebng.setAttributeNS(null, "style", "fill:"+bngcolor);
+          SVGbackgroundsymb.appendChild(symbolebng); 
+          var scale = 0.80;
+          symbole.setAttributeNS(null, "transform", "translate("+(width*j+(1.-scale)/2.*width)+","+(width*i+(1.-scale)/2.*width)+") scale(+"+scale+")");
           symbole.setAttributeNS(null, "style", "fill:"+color);
           SVGbackgroundsymb.appendChild(symbole);
+          
         }
       }
     }
