@@ -46,10 +46,11 @@ function transformfromprogram(start, p,width)
     for (i = 0; i < p.length; i++)
     {
       base = p[i][0];
-      if (p[i][0][0] != "F" || p[i][0][0] != "B")
+      if (p[i][0][0] != "F" && p[i][0][0] != "B")
         base = p[i][0][0];
+
       if (base in data.level.cost)
-        ret += data.level.cost[p[i][0]];
+        ret += data.level.cost[base];
       if (p[i][1] != -1)
         ret += data.level.cost["limit"];
       if (p[i][2] != "")
