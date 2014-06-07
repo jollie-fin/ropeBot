@@ -606,6 +606,7 @@ function createMap(width)
           symbolebng.setAttributeNS(null, "style", "fill:"+bngcolor);
           SVGbackgroundsymb.appendChild(symbolebng); 
           var scale = 0.80;
+            
           symbole.setAttributeNS(null, "transform", "translate("+(width*j+(1.-scale)/2.*width)+","+(width*i+(1.-scale)/2.*width)+") scale(+"+scale+")");
           symbole.setAttributeNS(null, "style", "fill:"+color);
           SVGbackgroundsymb.appendChild(symbole);
