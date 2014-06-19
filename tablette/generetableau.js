@@ -2,21 +2,14 @@
 function defaultFor(arg, val)
 { return typeof arg !== 'undefined' ? arg : val; }
 
-//http://stackoverflow.com/questions/10270711/copy-associative-array-in-javascript
-function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-    }
-    return copy;
-}
 
+/*Create a new point*/
 function newPt(x, y)
 {
   return {"x" : x, "y" : y};
 }
 
+/*Create a new SVGobject, with attributes already set*/
 function createSVGobject(type, attribute, namespace)
 {
   namespace = defaultFor(namespace, null);
@@ -28,6 +21,7 @@ function createSVGobject(type, attribute, namespace)
   return newSVGobject;
 }
 
+/*compute the physical coordinates of a point in the hexagonal system*/
 function computeCoord(pt)
 {
   var deltax = Math.cos(1./6.*Math.PI);
@@ -42,42 +36,54 @@ function computeCoord(pt)
           "y" : (deltay*pt.y+1./2.)};
 }
 
-
-function transformfromprogram(start, p,width)
+/*take a program and execute it. Return the translation and rotation animation of Nale, and the evolution of the Program Counter*/
+function transformFromProgram(start, p)
 {
+  /*how many times each instruction is executed. Used for count restriction */
   var repetition = new Array();  
 
+  /*coordinates of Nale*/
   var curPt = newPt(start["x"], start["y"]);
   
+  /*direction of Nale;
+  realdirection = dir*PI/3*/
+  
   var d = start["d"];
-
   var dir = 1;
   if (d in data.map.direction)
     dir = data.map.direction[d];
-  var dirIce = 1;
-  var onIce = false;
-  var coeffIce = 1;
-  var dirAngle = 60. * dir;
 
-  var rotate = "";
-  var trans = "";
-  var rotateInit = "";
-  var transInit = "";
+  /*variables used when Nale is on ice*/
+  /*direction of Nale*/
+  var dirIce = dir;
+  /*isNale on ice*/
+  var onIce = false;
   
-  var keys = new Array();
+  /*rotation animation*/
+  var rotateInit = "";
+  var rotate = "";
+  /*translation animation*/
+  var trans = "";
+  var transInit = "";
+
+  /*sequence of value of the Program Counter*/  
   var pcs = new Array();
+  
+  /*time key used to vary animation speed*/
+  var keys = new Array();
+  
+  /*how many instruction have been executed*/
   var iteration = 0;
+  
+  /*program counter*/
   var pc = 0;
 
-  var computeNextPt = function(oldPt, coeff, dir)
+  /*compute the next coordinate of nale depending of the moving direction*/
+  var computeNextPt = function(oldPt, dir)
   {
-    if (coeff < 0)
-    {
-      dir += 3;
-      if (dir >= 6)
-        dir -= 6;
-      coeff = -coeff;
-    }
+    if (dir < 0)
+      dir += (-dir) * 6;
+    dir %= 6;
      
     var delta = [[[1,0],[1,1],[0,1],[-1,0],[0,-1],[1,-1]],
                  [[1,0],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]]];
@@ -85,6 +91,7 @@ function transformfromprogram(start, p,width)
     return {"x" : oldPt.x + delta[parity][dir][0], "y" : oldPt.y + delta[parity][dir][1]};
   }
   
+  /*compute the total cost for the player*/
   var cost = function()
   {
     var i;
@@ -107,9 +114,10 @@ function transformfromprogram(start, p,width)
     return ret;
   }
 
-  var iterate = function(pt,dirAngle,time)
+  /*add a step in the animation*/
+  var iterate = function(pt,dir,time)
   {
-    rotate += ";" + dirAngle + "," + 0 + "," + 0;
+    rotate += ";" + (dir * 60.) + "," + 0 + "," + 0;
     coord = computeCoord(pt);
     trans += ";" + coord.x + "," + coord.y;
     pcs[iteration] = pc;
@@ -117,6 +125,7 @@ function transformfromprogram(start, p,width)
     iteration++;
   }
 
+  /*return the status of the ground under Nale*/
   var groundAt = function(pt)
   {
     var color = data.level.background[pt.y][pt.x];
@@ -142,22 +151,53 @@ function transformfromprogram(start, p,width)
     return !isOutside(pt);
   }
   
+  /*iterate one step when Nale is on ice*/
+  var slidingOnIce = function()
+  {
+    /*next position while sliding*/
+    var nextPt = computeNextPt(curPt, dirIce);
+    var nextGround = groundAt(nextPt);
+    /*end of the board*/
+    if (isOutside(nextPt))
+    {
+      iterate(curPt,dir+12,2.);
+      stop = true;
+    }
+    /*lava*/
+    else if (nextGround == "lava")
+    {
+      iterate(nextPt,dir,1.);
+      iterate(nextPt,dir+12,2.);
+      stop = true;
+    }
+    /*a wall stopped Nale*/
+    else if (nextGround != "wall")
+    {
+      curPt = nextPt;
+      iterate(curPt,dir,1.);
+    }
+  }
+            
+  /*initialise repetition*/
   for (var i = 0; i < p.length; i++)
     repetition[i] = 0;
 
+  /*initialise the various animations*/
   {
     var coord = computeCoord(curPt);
   
-    rotateInit = "rotate(" + dirAngle + "," + 0 + "," + 0 + ")";
+    rotateInit = "rotate(" + (dir * 60.) + "," + 0 + "," + 0 + ")";
     transInit = "translate(" + coord.x + "," + coord.y+ ")";
 
-    rotate = " " + dirAngle + "," + 0 + "," + 0;
+    rotate = " " + (dir * 60.) + "," + 0 + "," + 0;
     trans = " " + coord.x + "," + coord.y;
   }
   
   keys[iteration] = 0.;
+  
   var stop = false;
 
+  /*to avoid infinite loop, Nale cannot execute more than 1000 instructions*/
   while (pc < p.length && iteration < 1000 && !stop)
   {
     var accept = true;
@@ -174,69 +214,52 @@ function transformfromprogram(start, p,width)
                         || (   (p[pc][3][0] == "!" || symbol == p[pc][3])
                             && (p[pc][3][0] != "!" || color != p[pc][3].substring(1,p[pc][3].length))));
 
+    /*should the instruction be executed ?*/
     if (accept)
     {
       repetition[pc]++;
+      
+      /*switch depending on the instruction*/
       switch (p[pc][0][0])
       {
+        /*turning left ot right*/
         case "L":
         case "R":
-          var coeff = (p[pc][0][0] == "R") ? 1 : -1;
-          dir+=coeff;
-          if (dir == 6)
-            dir = 0;
-          if (dir == -1)
-            dir = 5;
-          dirAngle += coeff*60.;
+          dir += (p[pc][0][0] == "R") ? 1 : -1;
 
-          var nextPt = computeNextPt(curPt, coeffIce, dirIce);
           var ground = groundAt(curPt);
-          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
             onIce = false;
 
           if (onIce)
           {
-            if (isOutside(nextPt))
-            {
-              iterate(curPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround == "lava")
-            {
-              iterate(nextPt,dirAngle,1.);
-              iterate(nextPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround != "wall")
-            {
-              curPt = nextPt;
-            }
-            iterate(curPt,dirAngle,1.);
+            slidingOnIce();
           }
           else
           {
-            iterate(curPt,dirAngle,1.);
+            iterate(curPt,dir,1.);
           }
+          if (!stop)
+            pc++;
 
-          pc++;
           break;
 
+        /*forward or backward*/
         case "F":
         case "B":
-          var coeff = (p[pc][0][0] == "F") ? 1 : -1;
+          var isMovingBackward = p[pc][0][0] != "F";
           var nb = parseInt(p[pc][0].substring(1,p[pc][0].length));
 
+          /*compute multiple movement step by step*/
           for (i = 0; i < nb; i++)
           {
-            var nextPt = computeNextPt(curPt, coeff, dir);
+            var nextPt = computeNextPt(curPt, dir + isMovingBackward * 3);
 
+            /*end of the board*/
             if (isOutside(nextPt))
             {
-              iterate(curPt,dirAngle+720.,2.);
+              iterate(curPt,dir+12,2.);
               stop = true;
               break;
             }
@@ -244,12 +267,14 @@ function transformfromprogram(start, p,width)
             var ground = groundAt(curPt);
             var nextGround = groundAt(nextPt);
 
+            /*Nale cannot move*/
             if (nextGround == "wall")
             {
-                iterate(curPt,dirAngle,1.);
+                iterate(curPt,dir,1.);
                 i = nb-1;
                 break;
             }
+            /*if Nale is on sand, it have to move two steps to move on step on sand*/
             if (ground == "sand")
             {
               onIce = false;
@@ -257,53 +282,58 @@ function transformfromprogram(start, p,width)
               {
                 i++;
                 curPt = nextPt;
-                iterate(curPt,dirAngle,2.);
+                iterate(curPt,dir,2.);
               }
               else
               {
-                iterate(curPt,dirAngle,1.);
+                iterate(curPt,dir,1.);
                 break;
               }
             }
+            /*if Nale is on ice*/
             else if (nextGround == "ice" || ground == "ice")
             {
-              dirIce = dir;
-              coeffIce = coeff;
+              dirIce = dir + isMovingBackward*3;
+
               onIce = true;
               curPt = nextPt;
-              iterate(curPt,dirAngle,1.);
+              iterate(curPt,dir,1.);
             }
             else
             {
               onIce = false;
               curPt = nextPt;
-              iterate(curPt,dirAngle,1.);
+              iterate(curPt,dir,1.);
             }
 
+            /*if Nale fall in lava*/
             if (nextGround == "lava")
             {
-              iterate(curPt,dirAngle+720.,2.);
+              iterate(curPt,dir+12,2.);
               stop = true;
               break;
             }
+            /*if Nale go to space*/
             if (nextGround == "space")
             {
                 var nextNextPt = nextPt;
-
-                var nbcases = -1;
+                
+                /*how many tile Nale should move before touching ground*/
+                var nbTiles = -1;
                 while (isInside(nextNextPt) && groundAt(nextPt) == "space")
                 {
                   nextPt = nextNextPt;
                   nextNextPt = computeNextPt(nextNextPt, coeff, dir);
-                  nbcases++;
+                  nbTiles++;
                 }
                 curPt = nextPt;
 
-                dirAngle += 360.*nbcases;
-                iterate(curPt,dirAngle,nbcases);
+                /*rotate Nale on itself*/
+                dir += 6*nbTiles;
+                iterate(curPt,dir,nbTiles);
                 if (isOutside(nextNextPt))
                 {
-                  iterate(curPt,dirAngle+720.,2.);
+                  iterate(curPt,dir+12,2.);
                   stop = true;
                   break;
                 }
@@ -315,82 +345,50 @@ function transformfromprogram(start, p,width)
           pc++;
           break;
 
+        /*goto*/
         case "G":
           var label = p[pc][0].substring(1,p[pc][0].length);
+ 
+          /*search for the first corresponding label the dirty way*/
           var i = 0;
           while (i < p.length && p[i][0] != label)
             i++;
 
-          var nextPt = computeNextPt(curPt, coeffIce, dirIce);
           var ground = groundAt(curPt);
-          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
             onIce = false;
 
           if (onIce)
           {
-            if (isOutside(nextPt))
-            {
-              iterate(curPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround == "lava")
-            {
-              iterate(nextPt,dirAngle,1.);
-              iterate(nextPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround != "wall")
-            {
-              curPt = nextPt;
-            }
-            iterate(curPt,dirAngle,1.);
+            slidingOnIce();
           }
           else
           {
-            iterate(curPt,dirAngle,.4);
+            iterate(curPt,dir,.4);
           }
-          pc = i;
+          if (!stop)
+            pc = i;
           break;
 
+        /*nop instruction*/
         case "N":
-          var newx = computeNextPt(curPt, coeffIce, dirIce);
           var ground = groundAt(curPt);
-          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
             onIce = false;
 
           if (onIce)
           {
-            if (isOutside(nextPt))
-            {
-              iterate(curPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround == "lava")
-            {
-              iterate(nextPt,dirAngle,1.);
-              iterate(nextPt,dirAngle+720.,2.);
-              stop = true;
-              break;
-            }
-            else if (nextGround != "wall")
-            {
-              curPt = nextPt;
-            }
-            iterate(curPt,dirAngle,1.);
+            slidingOnIce();
           }
-
-          pc++;
+          if (!stop)
+            pc++;
           break;
 
+        /*unknown instruction*/
         default:
-          iterate(curPt,dirAngle,.4);
+          iterate(curPt,dir,.4);
           pc++;
           break;
       }
@@ -402,28 +400,32 @@ function transformfromprogram(start, p,width)
   }
   pcs[iteration] = pc;
 
-  var keysstring = "0";
 
+  /*compute the total duration*/
   var duration = keys[keys.length - 1];
-
+  
+  /*compute the time keys*/
+  var keysstring = "0";
   for (var i = 1; i < keys.length; i++)
   {
     keysstring += "; " + (keys[i] / duration);
   }
 
-
+  /*compute the sequence of value of the Program Counter*/
   var pctrans = "0,0";
   for (var i = 1; i < pcs.length; i++)
   {
     pctrans += "; 0," + pcs[i]*.5;
   }
   var pctransInit = "translate(0,0)";
+  
+  /*compute total cost*/
   var valcost = cost();
 
   return {"translate" : trans, "rotate" : rotate, "translateinit" : transInit, "rotateInit" : rotateInit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransInit" : pctransInit, "cost" : valcost};
 }
 
-
+/*create a symbol to print on tile*/
 function createSymbole(s)
 {
   switch (s)
@@ -497,6 +499,7 @@ function createSymbole(s)
   }
 }
 
+/*draw Nale at 0,0*/
 function coordNale()
 {
   var points = "";
@@ -511,12 +514,20 @@ function coordNale()
   return points;
 }
 
-
+/*create svgobject based on a simulation of the program*/
 function createSimulation(start, p)
 {
+  /*draw Nale*/
   var points = coordNale();
-  t = transformfromprogram(start,p);
+  
+  /*simulate the program*/
+  t = transformFromProgram(start,p);
 
+  /*effective duration of the simulation*/
+  duration = t["duration"] * 0.5;
+  duration = " " + duration + "s";
+
+  /*nale*/
   var nale =
     createSVGobject("polygon",
                      {"points":points,
@@ -524,22 +535,7 @@ function createSimulation(start, p)
                       "style" : "fill: orange;stroke:black;stroke-width:0.02px;",
                       "transform": t["rotateInit"]});
 
-
-  duration = t["duration"] * 0.5;
-  duration = " " + duration + "s";
-
-  var trans =
-    createSVGobject("animateTransform",
-                     {"id": "naleanimationtranslation",
-                      "attributeName": "transform",
-                      "attributeType": "XML",
-                      "type": "translate",
-                      "fill": "freeze",
-                      "values": t["translate"],
-                      "keyTimes": t["keys"],
-                      "begin": "pcanimationtranslation.begin",
-                      "dur": duration});
-
+  /*rotation animation of nale*/
   var rotate =
     createSVGobject("animateTransform",
                      {"id": "naleanimationrotation",
@@ -554,14 +550,29 @@ function createSimulation(start, p)
 
   nale.appendChild(rotate);
 
-  var groupnale =
+  /*combination of transformation animation*/                  
+  var groupNale =
     createSVGobject("g",
                      {"id" : "nale",
                       "transform": t["translateinit"]});
 
-  groupnale.appendChild(nale);
-  groupnale.appendChild(trans);
+  /*translation animation of nale*/
+  var trans =
+    createSVGobject("animateTransform",
+                     {"id": "naleanimationtranslation",
+                      "attributeName": "transform",
+                      "attributeType": "XML",
+                      "type": "translate",
+                      "fill": "freeze",
+                      "values": t["translate"],
+                      "keyTimes": t["keys"],
+                      "begin": "pcanimationtranslation.begin",
+                      "dur": duration});
 
+  groupNale.appendChild(nale);
+  groupNale.appendChild(trans);
+
+  /*animation of the Program Counter*/
   var pc =
     createSVGobject ("rect",
                       {"x": 0,
@@ -588,12 +599,15 @@ function createSimulation(start, p)
 
 
   pc.appendChild(pctrans);
+  
   var grouppc =
     createSVGobject("g",
                      {"id" : "pc"});
 
   grouppc.appendChild(pc);
 
+  
+  /*display of the instruction*/
   for (var i = 0; i < p.length; i++)
   {
     var text = 
@@ -605,6 +619,7 @@ function createSimulation(start, p)
     grouppc.appendChild(text);
   }
 
+  /*display of the cost of the program*/
   var textcost = 
     createSVGobject("text",
                      {"id" : "totalcost",
@@ -613,7 +628,7 @@ function createSimulation(start, p)
                       "font-size": (.5*.9)+"px"});
   textcost.textContent = t["cost"];
 
-  simulation = {"map" : groupnale, "exec" : grouppc, "cost" : textcost};
+  simulation = {"map" : groupNale, "exec" : grouppc, "cost" : textcost};
   return simulation;
 }
 
@@ -632,6 +647,7 @@ function createMap(height)
   {
     for (var j=0; j<10; j++)
     {
+      /*drawing of tile*/
       var color = data.map.colordefault;
       if (data.level.background[i][j] in data.map.color)
         color = data.map.color[data.level.background[i][j]];
@@ -655,7 +671,7 @@ function createMap(height)
 
       SVGbackgroundtile.appendChild(tile);
       
-      
+      /*drawing of symbol*/
       color = data.map.symbcolordefault;
       var bngcolor = data.map.symbbngcolordefault;
       if (data.level.background[i][j] in data.map.symbcolor)
@@ -679,6 +695,7 @@ function createMap(height)
     }
   }
 
+  /*global object with scaling attribute*/
   var SVGmap =
     createSVGobject("g",
                      {"id" : "map",
