@@ -69,7 +69,8 @@ data.program.content = [
 ["4",-1,"",""]];//*/
 
 
-data.level.ground = {"S" : "L"};
+//data.level.ground = {"S" : "L"};
+data.level.ground = {};
 data.level.cost = {"F1" : 1, "B1" : 0, "L" : 1, "R" : 1, "limit" : 2};
 
 data.program.start = {"x" : 5, "y" : 2, "d" : "E"};
@@ -87,6 +88,7 @@ data.program.content = [
 ["R",-1,"",""],
 ["B1",-1,"",""],
 ["L",-1,"",""],
+["B1",-1,"",""],
 ["B1",-1,"",""]
 //["N",-1,"",""],//
 ];

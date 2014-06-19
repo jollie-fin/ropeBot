@@ -2,6 +2,16 @@
 function defaultFor(arg, val)
 { return typeof arg !== 'undefined' ? arg : val; }
 
+//http://stackoverflow.com/questions/10270711/copy-associative-array-in-javascript
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+    }
+    return copy;
+}
+
 function createSVGobject(type, attribute, namespace)
 {
   namespace = defaultFor(namespace, null);
@@ -32,12 +42,9 @@ function transformfromprogram(start, p,width)
 {
   var repetition = new Array();  
 
-  var x = start["x"];
-  var y = start["y"];
+  var xy = {"x" : start["x"], "y" : start["y"]};
   
   var d = start["d"];
-
-  var delta=[[1,0],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]];
 
   var dir = 1;
   if (d in data.map.direction)
@@ -57,6 +64,24 @@ function transformfromprogram(start, p,width)
   var iteration = 0;
   var pc = 0;
 
+  var computeNewXY = function(coord, coeff, dir)
+  {
+    if (coeff < 0)
+    {
+      dir += 3;
+      if (dir >= 6)
+        dir -= 6;
+      coeff = -coeff;
+    }
+    if (coeff != 1)
+      alert("coeff must equal 1 or -1");
+      
+    var delta = [[[1,0],[1,1],[0,1],[-1,0],[0,-1],[1,-1]],
+                 [[1,0],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]]];
+    var parity = coord.y % 2;
+    return {"x" : coord.x + delta[parity][dir][0], "y" : coord.y + delta[parity][dir][1]};
+  }
+  
   var cost = function()
   {
     var i;
@@ -79,20 +104,20 @@ function transformfromprogram(start, p,width)
     return ret;
   }
 
-  var iterate = function(x,y,dirangle,time)
+  var iterate = function(xy,dirangle,time)
   {
     rotate += ";" + dirangle + "," + 0 + "," + 0;
-    coord = computeCoord(x,y);
+    coord = computeCoord(xy.x,xy.y);
     trans += ";" + coord.x + "," + coord.y;
     pcs[iteration] = pc;
     keys[iteration+1] = keys[iteration] + time;
     iteration++;
   }
 
-  var groundAt = function(x,y)
+  var groundAt = function(xy)
   {
-    var color = data.level.background[y][x];
-    var symbol = data.level.symb[y][x];
+    var color = data.level.background[xy.y][xy.x];
+    var symbol = data.level.symb[xy.y][xy.x];
     var ground = "";
     if (color in data.level.ground)
       ground = data.level.ground[color];
@@ -103,12 +128,22 @@ function transformfromprogram(start, p,width)
     else
       return "";
   }
+  
+  var isOutside = function(xy)
+  {
+    return newxy.x < 0 || newxy.x >= 10 || newxy.y < 0 || newxy.y >= 12;
+  }
 
+  var isInside = function(xy)
+  {
+    return !isOutside(xy);
+  }
+  
   for (var i = 0; i < p.length; i++)
     repetition[i] = 0;
 
   {
-    var coord = computeCoord(x,y);
+    var coord = computeCoord(xy.x,xy.y);
   
     rotateinit = "rotate(" + dirangle + "," + 0 + "," + 0 + ")";
     transinit = "translate(" + coord.x + "," + coord.y+ ")";
@@ -124,8 +159,8 @@ function transformfromprogram(start, p,width)
   {
     var accept = true;
     
-    var color = data.level.background[y][x];
-    var symbol = data.level.symb[y][x];
+    var color = data.level.background[xy.y][xy.x];
+    var symbol = data.level.symb[xy.y][xy.x];
 
     accept = accept && (   p[pc][1] == -1
                         || repetition[pc] < p[pc][1]);
@@ -151,39 +186,37 @@ function transformfromprogram(start, p,width)
             dir = 5;
           dirangle += coeff*60.;
 
-          var newx = x+coeffice*delta[dirice][0];
-          var newy = y+coeffice*delta[dirice][1];
-          var ground = groundAt(x,y);
-          var newground = groundAt(newx,newy);
+          var newxy = computeNewXY(xy, coeffice, dirice);
+          var ground = groundAt(xy);
+          var newground = groundAt(newxy);
 
           if (ground != "ice")
             onice = false;
 
           if (onice)
           {
-            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
+            if (isOutside(newxy))
             {
-              iterate(x,y,dirangle+720.,2.);
+              iterate(xy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground == "lava")
             {
-              iterate(newx,newy,dirangle,1.);
-              iterate(newx,newy,dirangle+720.,2.);
+              iterate(newxy,dirangle,1.);
+              iterate(newxy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground != "wall")
             {
-              x = newx;
-              y = newy;
+              xy = newxy;
             }
-            iterate(x,y,dirangle,1.);
+            iterate(xy,dirangle,1.);
           }
           else
           {
-            iterate(x,y,dirangle,1.);
+            iterate(xy,dirangle,1.);
           }
 
           pc++;
@@ -196,22 +229,21 @@ function transformfromprogram(start, p,width)
 
           for (i = 0; i < nb; i++)
           {
-            var newx = x+coeff*delta[dir][0];
-            var newy = y+coeff*delta[dir][1];
+            var newxy = computeNewXY(xy, coeff, dir);
 
-            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
+            if (isOutside(newxy))
             {
-              iterate(x,y,dirangle+720.,2.);
+              iterate(xy,dirangle+720.,2.);
               stop = true;
               break;
             }
 
-            var ground = groundAt(x,y);
-            var newground = groundAt(newx,newy);
+            var ground = groundAt(xy);
+            var newground = groundAt(newxy);
 
             if (newground == "wall")
             {
-                iterate(x,y,dirangle,1.);
+                iterate(xy,dirangle,1.);
                 i = nb-1;
                 break;
             }
@@ -221,13 +253,12 @@ function transformfromprogram(start, p,width)
               if (i < nb-1)
               {
                 i++;
-                x = newx;
-                y = newy;
-                iterate(x,y,dirangle,2.);
+                xy = newxy;
+                iterate(xy,dirangle,2.);
               }
               else
               {
-                iterate(x,y,dirangle,1.);
+                iterate(xy,dirangle,1.);
                 break;
               }
             }
@@ -236,44 +267,40 @@ function transformfromprogram(start, p,width)
               dirice = dir;
               coeffice = coeff;
               onice = true;
-              x = newx;
-              y = newy;
-              iterate(x,y,dirangle,1.);
+              xy = newxy;
+              iterate(xy,dirangle,1.);
             }
             else
             {
               onice = false;
-              x = newx;
-              y = newy;
-              iterate(x,y,dirangle,1.);
+              xy = newxy;
+              iterate(xy,dirangle,1.);
             }
 
             if (newground == "lava")
             {
-              iterate(x,y,dirangle+720.,2.);
+              iterate(xy,dirangle+720.,2.);
               stop = true;
               break;
             }
             if (newground == "space")
             {
-                var newnewx = newx;
-                var newnewy = newy;
+                var newnewxy = clone(newxy);
+
                 var nbcases = -1;
-                while (newnewx >= 0 && newnewx < 10 && newnewy >= 0 && newnewy < 12 && groundAt(newx,newy) == "space")
+                while (isInside(newnewxy) && groundAt(newxy) == "space")
                 {
-                  newx = newnewx;
-                  newy = newnewy;
-                  newnewx = newx + coeff*delta[dir][0];
-                  newnewy = newy + coeff*delta[dir][1];
+                  newxy = newnewxy;
+                  newnewxy = computeNewXY(newxy, coeff, dir);
                   nbcases++;
                 }
-                x = newx;
-                y = newy;
+                xy = newxy;
+
                 dirangle += 360.*nbcases;
-                iterate(x,y,dirangle,nbcases);
-                if (newnewx < 0 || newnewx >= 10 || newnewy < 0 || newnewy >= 12)
+                iterate(xy,dirangle,nbcases);
+                if (isOutside(newnewxy))
                 {
-                  iterate(x,y,dirangle+720.,2.);
+                  iterate(xy,dirangle+720.,2.);
                   stop = true;
                   break;
                 }
@@ -291,80 +318,76 @@ function transformfromprogram(start, p,width)
           while (i < p.length && p[i][0] != label)
             i++;
 
-          var newx = x+coeffice*delta[dirice][0];
-          var newy = y+coeffice*delta[dirice][1];
-          var ground = groundAt(x,y);
-          var newground = groundAt(newx,newy);
+          var newxy = computeNewXY(xy, coeffice, dirice);
+          var ground = groundAt(xy);
+          var newground = groundAt(newxy);
 
           if (ground != "ice")
             onice = false;
 
           if (onice)
           {
-            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
+            if (isOutside(newxy))
             {
-              iterate(x,y,dirangle+720.,2.);
+              iterate(xy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground == "lava")
             {
-              iterate(newx,newy,dirangle,1.);
-              iterate(newx,newy,dirangle+720.,2.);
+              iterate(newxy,dirangle,1.);
+              iterate(newxy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground != "wall")
             {
-              x = newx;
-              y = newy;
+              xy = newxy;
             }
-            iterate(x,y,dirangle,1.);
+            iterate(xy,dirangle,1.);
           }
           else
           {
-            iterate(x,y,dirangle,.4);
+            iterate(xy,dirangle,.4);
           }
           pc = i;
           break;
 
         case "N":
-          var newx = x+coeffice*delta[dirice][0];
-          var newy = y+coeffice*delta[dirice][1];
-          var ground = groundAt(x,y);
-          var newground = groundAt(newx,newy);
+          var newx = computeNewXY(xy, coeffice, dirice);
+          var ground = groundAt(xy);
+          var newground = groundAt(newxy);
 
           if (ground != "ice")
             onice = false;
 
           if (onice)
           {
-            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
+            if (isOutside(newxy))
             {
-              iterate(x,y,dirangle+720.,2.);
+              iterate(xy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground == "lava")
             {
-              iterate(newx,newy,dirangle,1.);
-              iterate(newx,newy,dirangle+720.,2.);
+              iterate(newxy,dirangle,1.);
+              iterate(newxy,dirangle+720.,2.);
               stop = true;
               break;
             }
             else if (newground != "wall")
             {
-              x = newx;
-              y = newy;
+              xy = newxy;
             }
-            iterate(x,y,dirangle,1.);
+            iterate(xy,dirangle,1.);
           }
 
           pc++;
           break;
 
         default:
-          iterate(x,y,dirangle,.4);
+          iterate(xy,dirangle,.4);
           pc++;
           break;
       }
@@ -376,7 +399,7 @@ function transformfromprogram(start, p,width)
   }
   pcs[iteration] = pc;
 
-  var keysstring = "0.";
+  var keysstring = "0";
 
   var duration = keys[keys.length - 1];
 
@@ -384,7 +407,6 @@ function transformfromprogram(start, p,width)
   {
     keysstring += "; " + (keys[i] / duration);
   }
-
 
 
   var pctrans = "0,0";
@@ -479,8 +501,8 @@ function coordNale()
   
   for (var i=-1; i<2; i++)
   {
-    dx = radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
-    dy = radius*Math.sin(Math.PI*(-1./2.+4./5.*i))-radius*0.4;
+    dx = radius*Math.cos(Math.PI*(4./5.*i));
+    dy = radius*Math.sin(Math.PI*(4./5.*i));//-radius*0.4;
     points = points + dx + "," + dy + " ";
   }
   return points;
@@ -557,8 +579,9 @@ function createSimulation(start, p)
                       "values": t["pctrans"],
                       "keyTimes": t["keys"],
                       "begin": "indefinite",
-                      "dur": duration,
-                      "calcMode": "discrete"});
+                      "calcMode": "discrete",
+                      "dur": duration
+                      });
 
 
   pc.appendChild(pctrans);
