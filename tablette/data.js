@@ -72,7 +72,7 @@ data.program.content = [
 data.level.ground = {"S" : "L"};
 data.level.cost = {"F1" : 1, "B1" : 0, "L" : 1, "R" : 1, "limit" : 2};
 
-data.program.start = {"x" : 11, "y" : 2, "d" : "left"};
+data.program.start = {"x" : 5, "y" : 2, "d" : "E"};
 data.program.content = [
 //["G1",-1,"",""],//
 //["1",-1,"",""],//
@@ -101,5 +101,5 @@ data.map.ground = {"S" : "sand", "A" : "space", "I" : "ice", "W" : "wall", "L" :
 data.map.colordefault = "rgb(0,0,255)";
 data.map.symbcolordefault = "rgb(0,0,0)";
 data.map.symbbngcolordefault = "rgb(255,255,255)";
-data.map.direction = {"up" : 0, "left" : 3, "down" : 2, "right" : 1};
+data.map.direction = {"E" : 0, "NE" : 1, "NW" : 2, "W" : 3, "SW" : 4, "SE" : 5};
 

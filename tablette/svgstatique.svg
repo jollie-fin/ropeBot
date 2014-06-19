@@ -19,7 +19,7 @@
   ]]>
 </script>
 <title>Simulation de la trajectoire de Nalé</title>
-<script xlink:href="data.js"/>
 <script xlink:href="generetableau.js"/>
+<script xlink:href="data.js"/>
 <!-- <script xlink:href="simulator.js"/>-->
 </svg>

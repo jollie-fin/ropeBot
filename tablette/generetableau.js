@@ -28,27 +28,30 @@ function computeCoord(x, y)
 }
 
 
-/*function transformfromprogram(start, p,width)
+function transformfromprogram(start, p,width)
 {
   var repetition = new Array();  
 
   var x = start["x"];
   var y = start["y"];
+  
   var d = start["d"];
 
-  var delta=[[0,-1],[1,0],[0,1],[-1,0]];
+  var delta=[[1,0],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]];
+
   var dir = 1;
   if (d in data.map.direction)
     dir = data.map.direction[d];
   var dirice = 1;
   var onice = false;
   var coeffice = 1;
-  var dirangle = 90 * dir;
-
-  var offset = width / 2.;
+  var dirangle = 60. * dir;
 
   var rotate = "";
   var trans = "";
+  var rotateinit = "";
+  var transinit = "";
+  
   var keys = new Array();
   var pcs = new Array();
   var iteration = 0;
@@ -78,8 +81,9 @@ function computeCoord(x, y)
 
   var iterate = function(x,y,dirangle,time)
   {
-    rotate += ";" + dirangle + "," + offset + "," + offset;
-    trans += ";" + (width*x) + "," + (width*y);
+    rotate += ";" + dirangle + "," + 0 + "," + 0;
+    coord = computeCoord(x,y);
+    trans += ";" + coord.x + "," + coord.y;
     pcs[iteration] = pc;
     keys[iteration+1] = keys[iteration] + time;
     iteration++;
@@ -103,11 +107,16 @@ function computeCoord(x, y)
   for (var i = 0; i < p.length; i++)
     repetition[i] = 0;
 
-  rotateinit = "rotate(" + dirangle + "," + offset + "," + offset + ")";
-  transinit = "translate(" + (width*x) + "," + (width*y)+ ")";
+  {
+    var coord = computeCoord(x,y);
+  
+    rotateinit = "rotate(" + dirangle + "," + 0 + "," + 0 + ")";
+    transinit = "translate(" + coord.x + "," + coord.y+ ")";
 
-  rotate = " " + dirangle + "," + offset + "," + offset;
-  trans = " " + (width*x) + "," + (width*y);
+    rotate = " " + dirangle + "," + 0 + "," + 0;
+    trans = " " + coord.x + "," + coord.y;
+  }
+  
   keys[iteration] = 0.;
   var stop = false;
 
@@ -136,11 +145,11 @@ function computeCoord(x, y)
         case "R":
           var coeff = (p[pc][0][0] == "R") ? 1 : -1;
           dir+=coeff;
-          if (dir == 4)
+          if (dir == 6)
             dir = 0;
           if (dir == -1)
-            dir = 3;
-          dirangle += coeff*90;
+            dir = 5;
+          dirangle += coeff*60.;
 
           var newx = x+coeffice*delta[dirice][0];
           var newy = y+coeffice*delta[dirice][1];
@@ -152,7 +161,7 @@ function computeCoord(x, y)
 
           if (onice)
           {
-            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
             {
               iterate(x,y,dirangle+720.,2.);
               stop = true;
@@ -190,7 +199,7 @@ function computeCoord(x, y)
             var newx = x+coeff*delta[dir][0];
             var newy = y+coeff*delta[dir][1];
 
-            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
             {
               iterate(x,y,dirangle+720.,2.);
               stop = true;
@@ -250,7 +259,7 @@ function computeCoord(x, y)
                 var newnewx = newx;
                 var newnewy = newy;
                 var nbcases = -1;
-                while (newnewx >= 0 && newnewx < 12 && newnewy >= 0 && newnewy < 12 && groundAt(newx,newy) == "space")
+                while (newnewx >= 0 && newnewx < 10 && newnewy >= 0 && newnewy < 12 && groundAt(newx,newy) == "space")
                 {
                   newx = newnewx;
                   newy = newnewy;
@@ -262,7 +271,7 @@ function computeCoord(x, y)
                 y = newy;
                 dirangle += 360.*nbcases;
                 iterate(x,y,dirangle,nbcases);
-                if (newnewx < 0 || newnewx >= 12 || newnewy < 0 || newnewy >= 12)
+                if (newnewx < 0 || newnewx >= 10 || newnewy < 0 || newnewy >= 12)
                 {
                   iterate(x,y,dirangle+720.,2.);
                   stop = true;
@@ -292,7 +301,7 @@ function computeCoord(x, y)
 
           if (onice)
           {
-            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
             {
               iterate(x,y,dirangle+720.,2.);
               stop = true;
@@ -330,7 +339,7 @@ function computeCoord(x, y)
 
           if (onice)
           {
-            if (newx < 0 || newx >= 12 || newy < 0 || newy >= 12)
+            if (newx < 0 || newx >= 10 || newy < 0 || newy >= 12)
             {
               iterate(x,y,dirangle+720.,2.);
               stop = true;
@@ -381,13 +390,13 @@ function computeCoord(x, y)
   var pctrans = "0,0";
   for (var i = 1; i < pcs.length; i++)
   {
-    pctrans += "; 0," + pcs[i]*width/2.;
+    pctrans += "; 0," + pcs[i]*.5;
   }
   var pctransinit = "translate(0,0)";
   var valcost = cost();
 
   return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit, "cost" : valcost};
-}*/
+}
 
 
 function createSymbole(s)
@@ -462,11 +471,11 @@ function createSymbole(s)
       return undefined;
   }
 }
-/*
-function coordNale(width)
+
+function coordNale()
 {
   var points = "";
-  var radius = width/4.;
+  var radius = .25;
   
   for (var i=-1; i<2; i++)
   {
@@ -478,16 +487,16 @@ function coordNale(width)
 }
 
 
-function createSimulation(start, p, width)
+function createSimulation(start, p)
 {
-  var points = coordNale(width);
-  t = transformfromprogram(start,p,width);
+  var points = coordNale();
+  t = transformfromprogram(start,p);
 
   var nale =
     createSVGobject("polygon",
                      {"points":points,
                       "id"    :"nale",
-                      "style" : "fill: orange;stroke:black;stroke-width:1px;",
+                      "style" : "fill: orange;stroke:black;stroke-width:0.02px;",
                       "transform": t["rotateinit"]});
 
 
@@ -531,11 +540,11 @@ function createSimulation(start, p, width)
   var pc =
     createSVGobject ("rect",
                       {"x": 0,
-                       "y": width / 8.,
+                       "y": .125,
                        "id": "pcindicator",
-                       "width": width / 4.,
-                       "height": width / 4.,
-                       "style": "fill: green;stroke:black;stroke-width:1px;",
+                       "width": .25,
+                       "height": .25,
+                       "style": "fill: green;stroke:black;stroke-width:0.02px;",
                        "transform": t["pctransinit"]});
 
   var pctrans = 
@@ -558,27 +567,29 @@ function createSimulation(start, p, width)
                      {"id" : "pc"});
 
   grouppc.appendChild(pc);
+
   for (var i = 0; i < p.length; i++)
   {
     var text = 
       createSVGobject("text",
-                       {"x": width/2. * .65,
-                        "y": width/2. * (.95+i),
-                        "font-size": (width/2.*.9)+"px"});
+                       {"x": .5 * .65,
+                        "y": .5 * (.95+i),
+                        "font-size": (.5 * .9)+"px"});
     text.textContent = p[i][0];
     grouppc.appendChild(text);
   }
 
   var textcost = 
     createSVGobject("text",
-                     {"x": width/2. * .1,
-                      "y": width/2. * .95,
-                      "font-size": (width/2.*.9)+"px"});
+                     {"id" : "totalcost",
+                      "x": .5 * .1,
+                      "y": 0.,
+                      "font-size": (.5*.9)+"px"});
   textcost.textContent = t["cost"];
 
   simulation = {"map" : groupnale, "exec" : grouppc, "cost" : textcost};
   return simulation;
-}*/
+}
 
 function createMap(height)
 {
@@ -648,40 +659,39 @@ function createMap(height)
                      "transform" : "scale("+height+")"});
 
 
-/*  simulation = createSimulation(data.program.start,data.program.content,width);
+  simulation = createSimulation(data.program.start,data.program.content);
 
   var SVGexec =
     createSVGobject("g",
-                     {"id" : "execution"});*/
+                     {"id" : "execution"});
 
   SVGmap.appendChild(SVGbackgroundtile);
   SVGmap.appendChild(SVGbackgroundsymb);
-/*  SVGmap.appendChild(simulation["map"]);*/
-  document.rootElement.appendChild(SVGmap);
-/*
-  simulation["exec"].setAttributeNS(null, "transform", "translate(480, 40)");
+  SVGmap.appendChild(simulation["map"]);
 
-  SVGexec.appendChild(simulation["exec"]);
-  document.rootElement.appendChild(SVGexec);
+  coordexec = computeCoord(10,0);
+  simulation["exec"].setAttributeNS(null, "transform", "translate("+coordexec.x+", "+coordexec.y+")");
+
+  SVGmap.appendChild(simulation["exec"]);
 
   var SVGcost =
     createSVGobject("g",
                      {"id" : "cost"});
-  simulation["cost"].setAttributeNS(null, "transform", "translate(480, 0)");
-  SVGcost.appendChild(simulation["cost"]);
-  document.rootElement.appendChild(SVGcost);*/
+  simulation["cost"].setAttributeNS(null, "transform", "translate("+coordexec.x+", "+coordexec.y+")");
+  SVGmap.appendChild(simulation["cost"]);
 
+  document.rootElement.appendChild(SVGmap);
 
 }
 
 function move()
 {
-//  document.getElementById("pcanimationtranslation").beginElement();
+  document.getElementById("pcanimationtranslation").beginElement();
 }
 
 function init()
 {
   createMap(50.);  
-//  document.rootElement.addEventListener("click", move, false);
+  document.rootElement.addEventListener("click", move, false);
 }
 
