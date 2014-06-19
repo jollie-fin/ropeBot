@@ -12,6 +12,11 @@ function clone(obj) {
     return copy;
 }
 
+function newPt(x, y)
+{
+  return {"x" : x, "y" : y};
+}
+
 function createSVGobject(type, attribute, namespace)
 {
   namespace = defaultFor(namespace, null);
@@ -23,18 +28,18 @@ function createSVGobject(type, attribute, namespace)
   return newSVGobject;
 }
 
-function computeCoord(x, y)
+function computeCoord(pt)
 {
   var deltax = Math.cos(1./6.*Math.PI);
   var deltay = .75;
   var offset;
-  if (y % 2 == 0)
+  if (pt.y % 2 == 0)
     offset = deltax / 2.;
   else
     offset = 0;
 
-  return {"x" : (deltax*x+offset+deltax/2.),
-          "y" : (deltay*y+1./2.)};
+  return {"x" : (deltax*pt.x+offset+deltax/2.),
+          "y" : (deltay*pt.y+1./2.)};
 }
 
 
@@ -42,29 +47,29 @@ function transformfromprogram(start, p,width)
 {
   var repetition = new Array();  
 
-  var xy = {"x" : start["x"], "y" : start["y"]};
+  var curPt = newPt(start["x"], start["y"]);
   
   var d = start["d"];
 
   var dir = 1;
   if (d in data.map.direction)
     dir = data.map.direction[d];
-  var dirice = 1;
-  var onice = false;
-  var coeffice = 1;
-  var dirangle = 60. * dir;
+  var dirIce = 1;
+  var onIce = false;
+  var coeffIce = 1;
+  var dirAngle = 60. * dir;
 
   var rotate = "";
   var trans = "";
-  var rotateinit = "";
-  var transinit = "";
+  var rotateInit = "";
+  var transInit = "";
   
   var keys = new Array();
   var pcs = new Array();
   var iteration = 0;
   var pc = 0;
 
-  var computeNewXY = function(coord, coeff, dir)
+  var computeNextPt = function(oldPt, coeff, dir)
   {
     if (coeff < 0)
     {
@@ -73,13 +78,11 @@ function transformfromprogram(start, p,width)
         dir -= 6;
       coeff = -coeff;
     }
-    if (coeff != 1)
-      alert("coeff must equal 1 or -1");
-      
+     
     var delta = [[[1,0],[1,1],[0,1],[-1,0],[0,-1],[1,-1]],
                  [[1,0],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]]];
-    var parity = coord.y % 2;
-    return {"x" : coord.x + delta[parity][dir][0], "y" : coord.y + delta[parity][dir][1]};
+    var parity = oldPt.y % 2;
+    return {"x" : oldPt.x + delta[parity][dir][0], "y" : oldPt.y + delta[parity][dir][1]};
   }
   
   var cost = function()
@@ -104,20 +107,20 @@ function transformfromprogram(start, p,width)
     return ret;
   }
 
-  var iterate = function(xy,dirangle,time)
+  var iterate = function(pt,dirAngle,time)
   {
-    rotate += ";" + dirangle + "," + 0 + "," + 0;
-    coord = computeCoord(xy.x,xy.y);
+    rotate += ";" + dirAngle + "," + 0 + "," + 0;
+    coord = computeCoord(pt);
     trans += ";" + coord.x + "," + coord.y;
     pcs[iteration] = pc;
     keys[iteration+1] = keys[iteration] + time;
     iteration++;
   }
 
-  var groundAt = function(xy)
+  var groundAt = function(pt)
   {
-    var color = data.level.background[xy.y][xy.x];
-    var symbol = data.level.symb[xy.y][xy.x];
+    var color = data.level.background[pt.y][pt.x];
+    var symbol = data.level.symb[pt.y][pt.x];
     var ground = "";
     if (color in data.level.ground)
       ground = data.level.ground[color];
@@ -129,26 +132,26 @@ function transformfromprogram(start, p,width)
       return "";
   }
   
-  var isOutside = function(xy)
+  var isOutside = function(pt)
   {
-    return newxy.x < 0 || newxy.x >= 10 || newxy.y < 0 || newxy.y >= 12;
+    return pt.x < 0 || pt.x >= 10 || pt.y < 0 || pt.y >= 12;
   }
 
-  var isInside = function(xy)
+  var isInside = function(pt)
   {
-    return !isOutside(xy);
+    return !isOutside(pt);
   }
   
   for (var i = 0; i < p.length; i++)
     repetition[i] = 0;
 
   {
-    var coord = computeCoord(xy.x,xy.y);
+    var coord = computeCoord(curPt);
   
-    rotateinit = "rotate(" + dirangle + "," + 0 + "," + 0 + ")";
-    transinit = "translate(" + coord.x + "," + coord.y+ ")";
+    rotateInit = "rotate(" + dirAngle + "," + 0 + "," + 0 + ")";
+    transInit = "translate(" + coord.x + "," + coord.y+ ")";
 
-    rotate = " " + dirangle + "," + 0 + "," + 0;
+    rotate = " " + dirAngle + "," + 0 + "," + 0;
     trans = " " + coord.x + "," + coord.y;
   }
   
@@ -159,8 +162,8 @@ function transformfromprogram(start, p,width)
   {
     var accept = true;
     
-    var color = data.level.background[xy.y][xy.x];
-    var symbol = data.level.symb[xy.y][xy.x];
+    var color = data.level.background[curPt.y][curPt.x];
+    var symbol = data.level.symb[curPt.y][curPt.x];
 
     accept = accept && (   p[pc][1] == -1
                         || repetition[pc] < p[pc][1]);
@@ -184,39 +187,39 @@ function transformfromprogram(start, p,width)
             dir = 0;
           if (dir == -1)
             dir = 5;
-          dirangle += coeff*60.;
+          dirAngle += coeff*60.;
 
-          var newxy = computeNewXY(xy, coeffice, dirice);
-          var ground = groundAt(xy);
-          var newground = groundAt(newxy);
+          var nextPt = computeNextPt(curPt, coeffIce, dirIce);
+          var ground = groundAt(curPt);
+          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
-            onice = false;
+            onIce = false;
 
-          if (onice)
+          if (onIce)
           {
-            if (isOutside(newxy))
+            if (isOutside(nextPt))
             {
-              iterate(xy,dirangle+720.,2.);
+              iterate(curPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground == "lava")
+            else if (nextGround == "lava")
             {
-              iterate(newxy,dirangle,1.);
-              iterate(newxy,dirangle+720.,2.);
+              iterate(nextPt,dirAngle,1.);
+              iterate(nextPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground != "wall")
+            else if (nextGround != "wall")
             {
-              xy = newxy;
+              curPt = nextPt;
             }
-            iterate(xy,dirangle,1.);
+            iterate(curPt,dirAngle,1.);
           }
           else
           {
-            iterate(xy,dirangle,1.);
+            iterate(curPt,dirAngle,1.);
           }
 
           pc++;
@@ -229,78 +232,78 @@ function transformfromprogram(start, p,width)
 
           for (i = 0; i < nb; i++)
           {
-            var newxy = computeNewXY(xy, coeff, dir);
+            var nextPt = computeNextPt(curPt, coeff, dir);
 
-            if (isOutside(newxy))
+            if (isOutside(nextPt))
             {
-              iterate(xy,dirangle+720.,2.);
+              iterate(curPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
 
-            var ground = groundAt(xy);
-            var newground = groundAt(newxy);
+            var ground = groundAt(curPt);
+            var nextGround = groundAt(nextPt);
 
-            if (newground == "wall")
+            if (nextGround == "wall")
             {
-                iterate(xy,dirangle,1.);
+                iterate(curPt,dirAngle,1.);
                 i = nb-1;
                 break;
             }
             if (ground == "sand")
             {
-              onice = false;
+              onIce = false;
               if (i < nb-1)
               {
                 i++;
-                xy = newxy;
-                iterate(xy,dirangle,2.);
+                curPt = nextPt;
+                iterate(curPt,dirAngle,2.);
               }
               else
               {
-                iterate(xy,dirangle,1.);
+                iterate(curPt,dirAngle,1.);
                 break;
               }
             }
-            else if (newground == "ice" || ground == "ice")
+            else if (nextGround == "ice" || ground == "ice")
             {
-              dirice = dir;
-              coeffice = coeff;
-              onice = true;
-              xy = newxy;
-              iterate(xy,dirangle,1.);
+              dirIce = dir;
+              coeffIce = coeff;
+              onIce = true;
+              curPt = nextPt;
+              iterate(curPt,dirAngle,1.);
             }
             else
             {
-              onice = false;
-              xy = newxy;
-              iterate(xy,dirangle,1.);
+              onIce = false;
+              curPt = nextPt;
+              iterate(curPt,dirAngle,1.);
             }
 
-            if (newground == "lava")
+            if (nextGround == "lava")
             {
-              iterate(xy,dirangle+720.,2.);
+              iterate(curPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            if (newground == "space")
+            if (nextGround == "space")
             {
-                var newnewxy = clone(newxy);
+                var nextNextPt = nextPt;
 
                 var nbcases = -1;
-                while (isInside(newnewxy) && groundAt(newxy) == "space")
+                while (isInside(nextNextPt) && groundAt(nextPt) == "space")
                 {
-                  newxy = newnewxy;
-                  newnewxy = computeNewXY(newxy, coeff, dir);
+                  nextPt = nextNextPt;
+                  nextNextPt = computeNextPt(nextNextPt, coeff, dir);
                   nbcases++;
                 }
-                xy = newxy;
+                curPt = nextPt;
 
-                dirangle += 360.*nbcases;
-                iterate(xy,dirangle,nbcases);
-                if (isOutside(newnewxy))
+                dirAngle += 360.*nbcases;
+                iterate(curPt,dirAngle,nbcases);
+                if (isOutside(nextNextPt))
                 {
-                  iterate(xy,dirangle+720.,2.);
+                  iterate(curPt,dirAngle+720.,2.);
                   stop = true;
                   break;
                 }
@@ -318,76 +321,76 @@ function transformfromprogram(start, p,width)
           while (i < p.length && p[i][0] != label)
             i++;
 
-          var newxy = computeNewXY(xy, coeffice, dirice);
-          var ground = groundAt(xy);
-          var newground = groundAt(newxy);
+          var nextPt = computeNextPt(curPt, coeffIce, dirIce);
+          var ground = groundAt(curPt);
+          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
-            onice = false;
+            onIce = false;
 
-          if (onice)
+          if (onIce)
           {
-            if (isOutside(newxy))
+            if (isOutside(nextPt))
             {
-              iterate(xy,dirangle+720.,2.);
+              iterate(curPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground == "lava")
+            else if (nextGround == "lava")
             {
-              iterate(newxy,dirangle,1.);
-              iterate(newxy,dirangle+720.,2.);
+              iterate(nextPt,dirAngle,1.);
+              iterate(nextPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground != "wall")
+            else if (nextGround != "wall")
             {
-              xy = newxy;
+              curPt = nextPt;
             }
-            iterate(xy,dirangle,1.);
+            iterate(curPt,dirAngle,1.);
           }
           else
           {
-            iterate(xy,dirangle,.4);
+            iterate(curPt,dirAngle,.4);
           }
           pc = i;
           break;
 
         case "N":
-          var newx = computeNewXY(xy, coeffice, dirice);
-          var ground = groundAt(xy);
-          var newground = groundAt(newxy);
+          var newx = computeNextPt(curPt, coeffIce, dirIce);
+          var ground = groundAt(curPt);
+          var nextGround = groundAt(nextPt);
 
           if (ground != "ice")
-            onice = false;
+            onIce = false;
 
-          if (onice)
+          if (onIce)
           {
-            if (isOutside(newxy))
+            if (isOutside(nextPt))
             {
-              iterate(xy,dirangle+720.,2.);
+              iterate(curPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground == "lava")
+            else if (nextGround == "lava")
             {
-              iterate(newxy,dirangle,1.);
-              iterate(newxy,dirangle+720.,2.);
+              iterate(nextPt,dirAngle,1.);
+              iterate(nextPt,dirAngle+720.,2.);
               stop = true;
               break;
             }
-            else if (newground != "wall")
+            else if (nextGround != "wall")
             {
-              xy = newxy;
+              curPt = nextPt;
             }
-            iterate(xy,dirangle,1.);
+            iterate(curPt,dirAngle,1.);
           }
 
           pc++;
           break;
 
         default:
-          iterate(xy,dirangle,.4);
+          iterate(curPt,dirAngle,.4);
           pc++;
           break;
       }
@@ -414,10 +417,10 @@ function transformfromprogram(start, p,width)
   {
     pctrans += "; 0," + pcs[i]*.5;
   }
-  var pctransinit = "translate(0,0)";
+  var pctransInit = "translate(0,0)";
   var valcost = cost();
 
-  return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit, "cost" : valcost};
+  return {"translate" : trans, "rotate" : rotate, "translateinit" : transInit, "rotateInit" : rotateInit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransInit" : pctransInit, "cost" : valcost};
 }
 
 
@@ -519,7 +522,7 @@ function createSimulation(start, p)
                      {"points":points,
                       "id"    :"nale",
                       "style" : "fill: orange;stroke:black;stroke-width:0.02px;",
-                      "transform": t["rotateinit"]});
+                      "transform": t["rotateInit"]});
 
 
   duration = t["duration"] * 0.5;
@@ -567,7 +570,7 @@ function createSimulation(start, p)
                        "width": .25,
                        "height": .25,
                        "style": "fill: green;stroke:black;stroke-width:0.02px;",
-                       "transform": t["pctransinit"]});
+                       "transform": t["pctransInit"]});
 
   var pctrans = 
     createSVGobject("animateTransform",
@@ -641,7 +644,7 @@ function createMap(height)
         var dy = 1./2. * Math.sin(Math.PI*(0.5+k*2./6.));
         points += dx + "," + dy + " ";
       }
-      var coord = computeCoord(j, i);
+      var coord = computeCoord(newPt(j, i));
 
       var tile =
         createSVGobject("polygon",
@@ -692,7 +695,7 @@ function createMap(height)
   SVGmap.appendChild(SVGbackgroundsymb);
   SVGmap.appendChild(simulation["map"]);
 
-  coordexec = computeCoord(10,0);
+  coordexec = computeCoord(newPt(10,0));
   simulation["exec"].setAttributeNS(null, "transform", "translate("+coordexec.x+", "+coordexec.y+")");
 
   SVGmap.appendChild(simulation["exec"]);
