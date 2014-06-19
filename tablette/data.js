@@ -4,18 +4,18 @@ var data = {};
 data.level = {};
 
 data.level.background = [
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange", "Blue", "Green"],
-["Cyan", "Blue", "Blue", "Red", "Blue", "Blue", "Blue", "Pink", "Blue", "Orange", "Blue", "Blue"],
-["Cyan", "Pink", "Pink", "Blue", "Red", "Blue", "Yellow", "Red", "Orange", "Pink", "Pink", "Blue"],
-["Blue", "Blue", "Purple", "Pink", "Blue", "Cyan", "Orange", "Purple", "Blue", "Pink", "Blue", "Pink"],
-["Blue", "Orange", "Orange", "Cyan", "Cyan", "Cyan", "Orange", "Orange", "Cyan", "Blue", "Purple", "Blue"],
-["Blue", "Blue", "Blue", "Orange", "Orange", "Cyan", "Cyan", "Cyan", "Orange", "Pink", "Blue", "Blue"],
-["Orange", "Blue", "Pink", "Pink", "Cyan", "Orange", "Cyan", "Cyan", "Blue", "Blue", "Blue", "Pink"],
-["Blue", "Purple", "Yellow", "Blue", "Cyan", "Cyan", "Cyan", "Orange", "Cyan", "Red", "Yellow", "Blue"],
-["Blue", "Red", "Blue", "Blue", "Purple", "Orange", "Cyan", "Cyan", "Purple", "Red", "Blue", "Blue"],
-["Yellow", "Pink", "Blue", "Pink", "Pink", "Cyan", "Orange", "Cyan", "Blue", "Pink", "Red", "Blue"],
-["Blue", "Blue", "Red", "Blue", "Blue", "Orange", "Red", "Blue", "Red", "Blue", "Blue", "Blue"],
-["Green", "Blue", "Purple", "Blue", "Blue", "Orange", "Red", "Blue", "Blue", "Blue", "Blue", "Green"]];
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
+["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"]];
 
 /*C : circle
   R : square
@@ -23,18 +23,18 @@ data.level.background = [
   S : star*/
 
 data.level.symb = [
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C", "S", "C"],
-["R", "R", "R", "T", "T", "C", "R", "S", "R", "C", "C", "T"],
-["R", "C", "C", "T", "R", "T", "T", "R", "T", "S", "S", "R"],
-["T", "T", "T", "R", "S", "S", "T", "R", "S", "S", "S", "S"],
-["T", "S", "C", "R", "T", "R", "T", "C", "C", "C", "T", "T"],
-["T", "S", "C", "C", "S", "C", "R", "S", "S", "T", "C", "S"],
-["R", "C", "S", "T", "S", "C", "R", "C", "C", "S", "S", "T"],
-["C", "C", "R", "R", "T", "S", "T", "C", "C", "R", "C", "R"],
-["S", "R", "C", "C", "R", "C", "C", "R", "C", "R", "C", "C"],
-["C", "T", "T", "T", "C", "R", "R", "T", "C", "C", "C", "S"],
-["R", "C", "C", "T", "R", "C", "C", "T", "R", "C", "T", "S"],
-["T", "S", "S", "S", "T", "S", "S", "R", "C", "C", "C", "C"]];
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
+["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"]];
 
 //data.level.ground = {"Blue" : "L"};
 /*
@@ -87,7 +87,7 @@ data.program.content = [
 ["R",-1,"",""],
 ["B1",-1,"",""],
 ["L",-1,"",""],
-["B1",-1,"",""],
+["B1",-1,"",""]
 //["N",-1,"",""],//
 ];
 

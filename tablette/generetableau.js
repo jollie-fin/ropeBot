@@ -13,7 +13,22 @@ function createSVGobject(type, attribute, namespace)
   return newSVGobject;
 }
 
-function transformfromprogram(start, p,width)
+function computeCoord(x, y)
+{
+  var deltax = Math.cos(1./6.*Math.PI);
+  var deltay = .75;
+  var offset;
+  if (y % 2 == 0)
+    offset = deltax / 2.;
+  else
+    offset = 0;
+
+  return {"x" : (deltax*x+offset+deltax/2.),
+          "y" : (deltay*y+1./2.)};
+}
+
+
+/*function transformfromprogram(start, p,width)
 {
   var repetition = new Array();  
 
@@ -372,41 +387,47 @@ function transformfromprogram(start, p,width)
   var valcost = cost();
 
   return {"translate" : trans, "rotate" : rotate, "translateinit" : transinit, "rotateinit" : rotateinit, "duration" : duration, "keys" : keysstring, "pc" : pcs, "pctrans" : pctrans, "pctransinit" : pctransinit, "cost" : valcost};
-}
+}*/
 
 
-function createSymbole(width,s)
+function createSymbole(s)
 {
-  var x = x*width;
-  var y = y*width;
   switch (s)
   {
     case "circle":
       var newSVGobject =
         createSVGobject("circle",
-                         {"cx": width/2.,
-                          "cy": width/2.,
-                          "r" : width/3.});
+                         {"cx": 0.,
+                          "cy": 0.,
+                          "r" : .45});
       return newSVGobject;
 
     case "square":
+      var radius = .5;
+      var points = "";
+
+      for (var i=0; i<4; i++)
+      {
+        var dx = radius*Math.cos(Math.PI*(.5*i+.25));
+        var dy = radius*Math.sin(Math.PI*(.5*i+.25));
+        points = points + dx + "," + dy + " ";
+      }
+
       var newSVGobject =
-        createSVGobject("rect",
-                         {"x" : width/6.,
-                          "y" : width/6.,
-                          "width" : width*2./3.,
-                          "height": width*2./3.});
+        createSVGobject("polygon",
+                         {"points":points});
+
       return newSVGobject;
 
 // triangle
     case "triangle":
-      var radius = width * .4;
+      var radius = .5;
       var points = "";
 
       for (var i=0; i<3; i++)
       {
-        var dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+2./3.*i));
-        var dy = width/2.+radius*0.2+radius*Math.sin(Math.PI*(-1./2.+2./3.*i));
+        var dx = radius*Math.cos(Math.PI*(-.5+2./3.*i));
+        var dy = radius*Math.sin(Math.PI*(-.5+2./3.*i));
         points = points + dx + "," + dy + " ";
       }
 
@@ -417,14 +438,19 @@ function createSymbole(width,s)
 
 //star
     case "star":
-      var radius = width * .4;
+      var radius = .5;
+      var innerradius = .2;
       var points = "";
 
       for (var i=0; i<5; i++)
       {
-        var dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
-        var dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i));
+        var dx = radius*Math.cos(Math.PI*(-.5+.4*i));
+        var dy = radius*Math.sin(Math.PI*(-.5+.4*i));
         points = points + dx + "," + dy + " ";
+        dx = innerradius*Math.cos(Math.PI*(-.3+.4*i));
+        dy = innerradius*Math.sin(Math.PI*(-.3+.4*i));
+        points = points + dx + "," + dy + " ";
+
       }
 
       var newSVGobject =
@@ -436,7 +462,7 @@ function createSymbole(width,s)
       return undefined;
   }
 }
-
+/*
 function coordNale(width)
 {
   var points = "";
@@ -444,8 +470,8 @@ function coordNale(width)
   
   for (var i=-1; i<2; i++)
   {
-    dx = width/2.+radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
-    dy = width/2.+radius*Math.sin(Math.PI*(-1./2.+4./5.*i))-radius*0.4;
+    dx = radius*Math.cos(Math.PI*(-1./2.+4./5.*i));
+    dy = radius*Math.sin(Math.PI*(-1./2.+4./5.*i))-radius*0.4;
     points = points + dx + "," + dy + " ";
   }
   return points;
@@ -552,44 +578,48 @@ function createSimulation(start, p, width)
 
   simulation = {"map" : groupnale, "exec" : grouppc, "cost" : textcost};
   return simulation;
-}
+}*/
 
-function createMap(width)
+function createMap(height)
 {
   var SVGbackgroundtile =
     createSVGobject("g",
                      {"id" : "backgroundtile"});
 
+  var SVGbackgroundsymb =
+    createSVGobject("g",
+                     {"id" : "backgroundsymb"});
+
+
   for (var i=0; i<12; i++)
   {
-    for (var j=0; j<12; j++)
+    for (var j=0; j<10; j++)
     {
       var color = data.map.colordefault;
       if (data.level.background[i][j] in data.map.color)
         color = data.map.color[data.level.background[i][j]];
 
+
+      var points = "";
+      for (var k = 0; k < 6; k++)
+      {
+        var dx = 1./2. * Math.cos(Math.PI*(0.5+k*2./6.));
+        var dy = 1./2. * Math.sin(Math.PI*(0.5+k*2./6.));
+        points += dx + "," + dy + " ";
+      }
+      var coord = computeCoord(j, i);
+
       var tile =
-        createSVGobject("rect",
-                         {"x": "0",
-                          "y": "0",
-                          "width": width,
-                          "height": width,
-                          "transform": "translate("+(width*j)+","+(width*i)+")",
-                          "style" : "fill:"+color+";stroke:black;stroke-width:1px;"});
+        createSVGobject("polygon",
+                         {"points":points,
+                          "transform": "translate("+coord.x+","+coord.y+")",
+                          "style" : "fill:"+color+";stroke:black;stroke-width:0.02px;"});
+
 
       SVGbackgroundtile.appendChild(tile);
-    }
-  }
-
-  var SVGbackgroundsymb =
-    createSVGobject("g",
-                     {"id" : "backgroundsymb"});
-
-  for (var i=0; i<12; i++)
-  {
-    for (var j=0; j<12; j++)
-    {
-      var color = data.map.symbcolordefault;
+      
+      
+      color = data.map.symbcolordefault;
       var bngcolor = data.map.symbbngcolordefault;
       if (data.level.background[i][j] in data.map.symbcolor)
         color = data.map.symbcolor[data.level.background[i][j]];
@@ -598,40 +628,37 @@ function createMap(width)
         
       if (data.level.symb[i][j] in data.map.symb)
       {
-        var symbole = createSymbole(width,data.map.symb[data.level.symb[i][j]]);
+        var symbole = createSymbole(data.map.symb[data.level.symb[i][j]]);
         if (symbole !== undefined)
         {
-          var symbolebng = symbole.cloneNode(true);
-          symbolebng.setAttributeNS(null, "transform", "translate("+(width*j)+","+(width*i)+")");
-          symbolebng.setAttributeNS(null, "style", "fill:"+bngcolor);
-          SVGbackgroundsymb.appendChild(symbolebng); 
-          var scale = 0.80;
-            
-          symbole.setAttributeNS(null, "transform", "translate("+(width*j+(1.-scale)/2.*width)+","+(width*i+(1.-scale)/2.*width)+") scale(+"+scale+")");
-          symbole.setAttributeNS(null, "style", "fill:"+color);
-          SVGbackgroundsymb.appendChild(symbole);
-          
+          var sizebng = 0.6;
+
+          symbole.setAttributeNS(null, "transform", "translate("+coord.x+","+coord.y+") scale(+"+sizebng+")");
+          symbole.setAttributeNS(null, "style", "fill:"+color+";stroke:"+bngcolor+";stroke-width:0.05px;");
+          SVGbackgroundsymb.appendChild(symbole);          
         }
       }
+
     }
   }
 
   var SVGmap =
     createSVGobject("g",
-                     {"id" : "map"});
+                     {"id" : "map",
+                     "transform" : "scale("+height+")"});
 
 
-  simulation = createSimulation(data.program.start,data.program.content,width);
+/*  simulation = createSimulation(data.program.start,data.program.content,width);
 
   var SVGexec =
     createSVGobject("g",
-                     {"id" : "execution"});
+                     {"id" : "execution"});*/
 
   SVGmap.appendChild(SVGbackgroundtile);
   SVGmap.appendChild(SVGbackgroundsymb);
-  SVGmap.appendChild(simulation["map"]);
+/*  SVGmap.appendChild(simulation["map"]);*/
   document.rootElement.appendChild(SVGmap);
-
+/*
   simulation["exec"].setAttributeNS(null, "transform", "translate(480, 40)");
 
   SVGexec.appendChild(simulation["exec"]);
@@ -642,19 +669,19 @@ function createMap(width)
                      {"id" : "cost"});
   simulation["cost"].setAttributeNS(null, "transform", "translate(480, 0)");
   SVGcost.appendChild(simulation["cost"]);
-  document.rootElement.appendChild(SVGcost);
+  document.rootElement.appendChild(SVGcost);*/
 
 
 }
 
 function move()
 {
-  document.getElementById("pcanimationtranslation").beginElement();
+//  document.getElementById("pcanimationtranslation").beginElement();
 }
 
 function init()
 {
-  createMap(40.);  
-  document.rootElement.addEventListener("click", move, false);
+  createMap(50.);  
+//  document.rootElement.addEventListener("click", move, false);
 }
 
