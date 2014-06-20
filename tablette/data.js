@@ -1,9 +1,9 @@
 const svgns = "http://www.w3.org/2000/svg";
 
 var data = {};
-data.level = {};
+data.drawing = {};
 
-data.level.background = [
+data.drawing.color = [
 ["C", "C", "B", "B", "B", "B", "B", "B", "R", "G"],
 ["C", "P", "C", "B", "B", "B", "R", "P", "R", "B"],
 ["C", "Y", "C", "B", "B", "B", "R", "R", "B", "B"],
@@ -22,7 +22,7 @@ data.level.background = [
   T : triangle
   S : star*/
 
-data.level.symb = [
+data.drawing.symb = [
 [" ", " ", "S", " ", " ", " ", " ", " ", " ", "C"],
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
 [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
@@ -47,8 +47,6 @@ GX : goto label X
 N : nop
 */
 
-data.program = {};
-
 /*data.level.ground = {};
 data.program.start = {"x" : 1, "y" : 3, "d" : "up"};
 data.program.content = [
@@ -68,31 +66,7 @@ data.program.content = [
 ["G3",-1,"",""],
 ["4",-1,"",""]];//*/
 
-
-data.level.ground = {};
-data.level.ground.color = {"B" : "A"};
-data.level.ground.symb = {};
-data.level.cost = {"F1" : 1, "B1" : 0, "L" : 1, "R" : 1, "limit" : 2};
-
-data.program.start = {"x" : 5, "y" : 2, "d" : "E"};
-data.program.content = [
-//["G1",-1,"",""],//
-//["1",-1,"",""],//
-["L",-1,"",""],
-["B1",-1,"",""],
-["L",-1,"",""],
-["B1",-1,"",""],
-["B1",-1,"",""],
-["B1",-1,"",""],
-["L",-1,"",""],
-["B1",-1,"",""],
-["R",-1,"",""],
-["B1",-1,"",""],
-["L",-1,"",""],
-["B1",-1,"",""],
-["B1",-1,"",""]
-//["N",-1,"",""],//
-];
+data.level = new Array();
 
 data.map = {};
 data.map.color = {"O" : "rgb(255, 102, 0)", "R" : "rgb(255,0,0)", "B" : "rgb(0,0,255)", "C" : "rgb(0, 255, 255)", "P" : "rgb(191, 0, 255)", "Q" : "rgb(255, 190, 200)", "Y" : "rgb(255, 255, 0)", "G" : "rgb(0, 255, 0)", "A" : "rgb(0,0,0)", "W" : "rgb(255,255,255)"};

@@ -1,4 +1,7 @@
 //http://stackoverflow.com/questions/894860/set-a-default-parameter-value-for-a-javascript-function
+
+var noLevel = 0;
+
 function defaultFor(arg, val)
 { return typeof arg !== 'undefined' ? arg : val; }
 
@@ -39,18 +42,19 @@ function computeCoord(pt)
 }
 
 /*take a program and execute it. Return the translation and rotation animation of Nale, and the evolution of the Program Counter*/
-function transformFromProgram(start, p)
+function transformFromProgram(noLevel)
 {
   /*how many times each instruction is executed. Used for count restriction */
   var repetition = new Array();  
 
   /*coordinates of Nale*/
-  var curPt = newPt(start["x"], start["y"]);
+  var curPt = newPt(data.level[noLevel].start["x"],
+                    data.level[noLevel].start["y"]);
   
   /*direction of Nale;
   realdirection = dir*PI/3*/
   
-  var d = start["d"];
+  var d = data.level[noLevel].start["d"];
   var dir = 1;
   if (d in data.map.direction)
     dir = data.map.direction[d];
@@ -80,6 +84,9 @@ function transformFromProgram(start, p)
   /*program counter*/
   var pc = 0;
 
+  /*program*/
+  var p = data.level[noLevel].content;
+  
   /*compute the next coordinate of nale depending of the moving direction*/
   var computeNextPt = function(oldPt, dir)
   {
@@ -104,14 +111,14 @@ function transformFromProgram(start, p)
       if (p[i][0][0] != "F" && p[i][0][0] != "B")
         base = p[i][0][0];
 
-      if (base in data.level.cost)
-        ret += data.level.cost[base];
+      if (base in data.level[noLevel].cost)
+        ret += data.level[noLevel].cost[base];
       if (p[i][1] != -1)
-        ret += data.level.cost["limit"];
+        ret += data.level[noLevel].cost["limit"];
       if (p[i][2] != "")
-        ret += data.level.cost["color"];
+        ret += data.level[noLevel].cost["color"];
       if (p[i][3] != "")
-        ret += data.level.cost["symbol"];
+        ret += data.level[noLevel].cost["symbol"];
     }
     return ret;
   }
@@ -130,13 +137,13 @@ function transformFromProgram(start, p)
   /*return the status of the ground under Nale*/
   var groundAt = function(pt)
   {
-    var color = data.level.background[pt.y][pt.x];
-    var symbol = data.level.symb[pt.y][pt.x];
+    var color = data.drawing.color[pt.y][pt.x];
+    var symbol = data.drawing.symb[pt.y][pt.x];
     var groundcolor = "";
     var groundsymb = "";
     var ground = "";
-    if (color in data.level.ground.color)
-      groundcolor = data.level.ground.color[color];
+    if (color in data.level[noLevel].color)
+      groundcolor = data.level[noLevel].color[color];
       
     if (groundcolor in data.map.ground)
       groundcolor = data.map.ground[groundcolor];
@@ -144,8 +151,8 @@ function transformFromProgram(start, p)
       groundcolor = "";
   
             
-    if (symbol in data.level.ground.symb)
-      groundsymb = data.level.ground.symb[symbol];
+    if (symbol in data.level[noLevel].symb)
+      groundsymb = data.level[noLevel].symb[symbol];
     
     if (groundsymb in data.map.ground)
       groundsymb = data.map.ground[groundsymb];
@@ -229,8 +236,8 @@ function transformFromProgram(start, p)
   {
     var accept = true;
     
-    var color = data.level.background[curPt.y][curPt.x];
-    var symbol = data.level.symb[curPt.y][curPt.x];
+    var color = data.drawing.color[curPt.y][curPt.x];
+    var symbol = data.drawing.symb[curPt.y][curPt.x];
 
     accept = accept && (   p[pc][1] == -1
                         || repetition[pc] < p[pc][1]);
@@ -542,13 +549,16 @@ function coordNale()
 }
 
 /*create svgobject based on a simulation of the program*/
-function createSimulation(start, p)
+function createSimulation(noLevel)
 {
+  var nbLevel = data.level.length;
+  noLevel %= nbLevel;
+  
   /*draw Nale*/
   var points = coordNale();
   
   /*simulate the program*/
-  t = transformFromProgram(start,p);
+  t = transformFromProgram(noLevel);
 
   /*effective duration of the simulation*/
   duration = t["duration"] * 0.5;
@@ -632,9 +642,9 @@ function createSimulation(start, p)
                      {"id" : "pc"});
 
   grouppc.appendChild(pc);
-
   
   /*display of the instruction*/
+  var p = data.level[noLevel].content;
   for (var i = 0; i < p.length; i++)
   {
     var text = 
@@ -677,8 +687,8 @@ function createMap()
     {
       /*drawing of tile*/
       var color = data.map.colordefault;
-      if (data.level.background[i][j] in data.map.color)
-        color = data.map.color[data.level.background[i][j]];
+      if (data.drawing.color[i][j] in data.map.color)
+        color = data.map.color[data.drawing.color[i][j]];
 
 
       var points = "";
@@ -703,9 +713,9 @@ function createMap()
       color = data.map.symbcolor;
       bngcolor = data.map.symbbngcolor;
         
-      if (data.level.symb[i][j] in data.map.symb)
+      if (data.drawing.symb[i][j] in data.map.symb)
       {
-        var symbole = createSymbole(data.map.symb[data.level.symb[i][j]]);
+        var symbole = createSymbole(data.map.symb[data.drawing.symb[i][j]]);
         if (symbole !== undefined)
         {
           var sizebng = 0.6;
@@ -724,18 +734,35 @@ function createMap()
     createSVGobject("g",
                      {"id" : "map"});
 
+  var coordbutton = computeCoord(newPt(0,11));
+  var SVGbutton =
+    createSVGobject("rect",
+                     {"id" : "change",
+                      "x" : coordbutton.x,
+                      "y" : coordbutton.y+.5,
+                      "width" : .5,
+                      "height" : .5,
+                      "style" : "fill: black;"});
+  SVGmap.appendChild(SVGbutton);
 
-  simulation = createSimulation(data.program.start,data.program.content);
+  var points = (coordbutton.x + 1.) + "," + (coordbutton.y + .5) + " ";
+  points += (coordbutton.x + 1.) + "," + (coordbutton.y + 1.) + " ";
+  points += (coordbutton.x + 1.5) + "," + (coordbutton.y + .75);
+  var SVGbutton =
+    createSVGobject("polygon",
+                     {"id" : "move",
+                      "points" : points,
+                      "style" : "fill: black;"});
+  SVGmap.appendChild(SVGbutton);                                       
 
-  var SVGexec =
-    createSVGobject("g",
-                     {"id" : "execution"});
+
+  var simulation = createSimulation(noLevel);
 
   SVGmap.appendChild(SVGbackgroundtile);
   SVGmap.appendChild(SVGbackgroundsymb);
   SVGmap.appendChild(simulation["map"]);
 
-  coordexec = computeCoord(newPt(10,0));
+  var coordexec = computeCoord(newPt(10,0));
   simulation["exec"].setAttributeNS(null, "transform", "translate("+(coordexec.x-0.3)+", "+coordexec.y+")");
 
   SVGmap.appendChild(simulation["exec"]);
@@ -754,9 +781,39 @@ function move()
   document.getElementById("pcanimationtranslation").beginElement();
 }
 
+function changeProgram()
+{
+  noLevel++;
+  noLevel %= data.level.length;
+  
+  var SVGmap = document.getElementById("map");
+  var toremove = document.getElementById("nale");
+  toremove.parentNode.removeChild(toremove);
+  toremove = document.getElementById("pc");
+  toremove.parentNode.removeChild(toremove);
+  toremove = document.getElementById("totalcost");
+  toremove.parentNode.removeChild(toremove);
+
+  var simulation = createSimulation(noLevel);
+
+  SVGmap.appendChild(simulation["map"]);
+
+  var coordexec = computeCoord(newPt(10,0));
+  simulation["exec"].setAttributeNS(null, "transform", "translate("+(coordexec.x-0.3)+", "+coordexec.y+")");
+
+  SVGmap.appendChild(simulation["exec"]);
+
+  var SVGcost =
+    createSVGobject("g",
+                     {"id" : "cost"});
+  simulation["cost"].setAttributeNS(null, "transform", "translate("+(coordexec.x-0.3)+", "+coordexec.y+")");
+  SVGmap.appendChild(simulation["cost"]);
+}
+
 function init()
 {
   createMap(50.);  
-  document.rootElement.addEventListener("click", move, false);
+  document.getElementById("change").addEventListener("click", changeProgram, false);
+  document.getElementById("move").addEventListener("click", move, false);
 }
 
