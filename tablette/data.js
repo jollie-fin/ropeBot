@@ -4,18 +4,18 @@ var data = {};
 data.level = {};
 
 data.level.background = [
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"],
-["Cyan", "Cyan", "Blue", "Blue", "Blue", "Red", "Blue", "Pink", "Blue", "Orange"]];
+["C", "C", "B", "B", "B", "B", "B", "B", "R", "G"],
+["C", "P", "C", "B", "B", "B", "R", "P", "R", "B"],
+["C", "Y", "C", "B", "B", "B", "R", "R", "B", "B"],
+["R", "R", "B", "B", "C", "C", "C", "P", "P", "B"],
+["P", "R", "R", "C", "C", "C", "Q", "Q", "P", "B"],
+["B", "P", "Q", "R", "C", "C", "C", "Q", "C", "B"],
+["B", "P", "P", "Y", "R", "C", "Q", "C", "B", "B"],
+["P", "P", "Q", "P", "R", "C", "C", "Q", "P", "P"],
+["P", "Q", "P", "B", "B", "R", "P", "P", "P", "P"],
+["B", "R", "R", "P", "P", "R", "Q", "O", "O", "O"],
+["B", "B", "R", "Q", "P", "R", "P", "Y", "O", "B"],
+["G", "B", "P", "P", "P", "R", "P", "O", "B", "G"]];
 
 /*C : circle
   R : square
@@ -23,20 +23,20 @@ data.level.background = [
   S : star*/
 
 data.level.symb = [
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"],
-["S", "C", "S", "T", "C", "S", "R", "S", "C", "C"]];
+[" ", " ", "S", " ", " ", " ", " ", " ", " ", "C"],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+["S", " ", " ", " ", " ", " ", " ", " ", " ", " "]];
 
-//data.level.ground = {"Blue" : "L"};
+//data.level.ground = {"B" : "L"};
 /*
 L : turn left
 R : turn right
@@ -56,7 +56,7 @@ data.program.content = [
 ["R",-1,"","T"],
 ["F1",-1,"",""],
 ["F0",-1,"",""],
-["G1",-1,"!Pink",""],
+["G1",-1,"!Q",""],
 ["2",-1,"",""],
 ["F1",-1,"!Grey",""],
 ["G2",2,"",""],
@@ -64,13 +64,14 @@ data.program.content = [
 ["F1",-1,"",""],
 ["3",-1,"",""],
 ["F1",-1,"",""],
-["G4",-1,"Red","C"],
+["G4",-1,"R","C"],
 ["G3",-1,"",""],
 ["4",-1,"",""]];//*/
 
 
-//data.level.ground = {"S" : "L"};
 data.level.ground = {};
+data.level.ground.color = {"B" : "A"};
+data.level.ground.symb = {};
 data.level.cost = {"F1" : 1, "B1" : 0, "L" : 1, "R" : 1, "limit" : 2};
 
 data.program.start = {"x" : 5, "y" : 2, "d" : "E"};
@@ -94,14 +95,12 @@ data.program.content = [
 ];
 
 data.map = {};
-data.map.color = {"Orange" : "rgb(255, 102, 0)", "Red" : "rgb(255,0,0)", "Blue" : "rgb(0,0,255)", "Cyan" : "rgb(0, 255, 255)", "Purple" : "rgb(128, 0, 128)", "Pink" : "rgb(255, 0, 255)", "Yellow" : "rgb(255, 255, 0)", "Green" : "rgb(0, 255, 0)"};
-data.map.symbcolor = {"Orange" : "rgb(0, 0, 0)", "Red" : "rgb(0, 0, 0)", "White" : "rgb(0, 0, 0)", "Blue" : "rgb(0, 0, 0)", "Cyan" : "rgb(0, 0, 0)", "Grey" : "rgb(0, 0, 0)", "Purple" : "rgb(0, 0, 0)", "Black" : "rgb(0, 0, 0)", "Pink" : "rgb(0, 0, 0)", "Yellow" : "rgb(0, 0, 0)", "Green" : "rgb(0, 0, 0)"};
-data.map.symbbngcolor = {"Orange" : "rgb(255, 255, 255)", "Red" : "rgb(255, 255, 255)", "White" : "rgb(255, 255, 255)", "Blue" : "rgb(255, 255, 255)", "Cyan" : "rgb(255, 255, 255)", "Grey" : "rgb(255, 255, 255)", "Purple" : "rgb(255, 255, 255)", "Black" : "rgb(255, 255, 255)", "Pink" : "rgb(255, 255, 255)", "Yellow" : "rgb(255, 255, 255)", "Green" : "rgb(255, 255, 255)"};
+data.map.color = {"O" : "rgb(255, 102, 0)", "R" : "rgb(255,0,0)", "B" : "rgb(0,0,255)", "C" : "rgb(0, 255, 255)", "P" : "rgb(191, 0, 255)", "Q" : "rgb(255, 190, 200)", "Y" : "rgb(255, 255, 0)", "G" : "rgb(0, 255, 0)", "A" : "rgb(0,0,0)", "W" : "rgb(255,255,255)"};
+data.map.symbcolor = "rgb(0, 0, 0)";
+data.map.symbbngcolor = "rgb(255,255,255)";
 data.map.symb = {"C" : "circle", "R" : "square", "T" : "triangle", "S" : "star"};
 data.map.ground = {"S" : "sand", "A" : "space", "I" : "ice", "W" : "wall", "L" : "lava"};
 
 data.map.colordefault = "rgb(0,0,255)";
-data.map.symbcolordefault = "rgb(0,0,0)";
-data.map.symbbngcolordefault = "rgb(255,255,255)";
 data.map.direction = {"E" : 0, "NE" : 1, "NW" : 2, "W" : 3, "SW" : 4, "SE" : 5};
 

@@ -12,8 +12,10 @@ function newPt(x, y)
 /*Create a new SVGobject, with attributes already set*/
 function createSVGobject(type, attribute, namespace)
 {
+
   namespace = defaultFor(namespace, null);
   newSVGobject = document.createElementNS(svgns, type);
+
   for (var key in attribute)
   {
     newSVGobject.setAttributeNS(namespace, key, attribute[key]);
@@ -33,7 +35,7 @@ function computeCoord(pt)
     offset = 0;
 
   return {"x" : (deltax*pt.x+offset+deltax/2.),
-          "y" : (deltay*pt.y+1./2.)};
+          "y" : (deltay*pt.y+.5)};
 }
 
 /*take a program and execute it. Return the translation and rotation animation of Nale, and the evolution of the Program Counter*/
@@ -130,15 +132,40 @@ function transformFromProgram(start, p)
   {
     var color = data.level.background[pt.y][pt.x];
     var symbol = data.level.symb[pt.y][pt.x];
+    var groundcolor = "";
+    var groundsymb = "";
     var ground = "";
-    if (color in data.level.ground)
-      ground = data.level.ground[color];
-    if (symbol in data.level.ground)
-      ground = data.level.ground[symbol];
-    if (ground in data.map.ground)
-      return data.map.ground[ground];
+    if (color in data.level.ground.color)
+      groundcolor = data.level.ground.color[color];
+      
+    if (groundcolor in data.map.ground)
+      groundcolor = data.map.ground[groundcolor];
     else
-      return "";
+      groundcolor = "";
+  
+            
+    if (symbol in data.level.ground.symb)
+      groundsymb = data.level.ground.symb[symbol];
+    
+    if (groundsymb in data.map.ground)
+      groundsymb = data.map.ground[groundsymb];
+    else
+      groundsymb = "";
+      
+    if (groundcolor == "")
+      return groundsymb;
+    else if (groundsymb == "")
+      return groundcolor;
+    else if (groundsymb == "wall" || groundcolor == "wall")
+      return "wall";
+    else if (groundsymb == "space" || groundcolor == "space")
+      return "space";
+    else if (groundsymb == "sand" || groundcolor == "sand")
+      return "sand";
+    else if (groundsymb == "lava" || groundcolor == "lava")
+      return "lava";
+    else
+      return "ice";  
   }
   
   var isOutside = function(pt)
@@ -323,7 +350,7 @@ function transformFromProgram(start, p)
                 while (isInside(nextNextPt) && groundAt(nextPt) == "space")
                 {
                   nextPt = nextNextPt;
-                  nextNextPt = computeNextPt(nextNextPt, coeff, dir);
+                  nextNextPt = computeNextPt(nextNextPt, dir + isMovingBackward * 3);
                   nbTiles++;
                 }
                 curPt = nextPt;
@@ -631,8 +658,9 @@ function createSimulation(start, p)
   simulation = {"map" : groupNale, "exec" : grouppc, "cost" : textcost};
   return simulation;
 }
+  
 
-function createMap(height)
+function createMap()
 {
   var SVGbackgroundtile =
     createSVGobject("g",
@@ -672,12 +700,8 @@ function createMap(height)
       SVGbackgroundtile.appendChild(tile);
       
       /*drawing of symbol*/
-      color = data.map.symbcolordefault;
-      var bngcolor = data.map.symbbngcolordefault;
-      if (data.level.background[i][j] in data.map.symbcolor)
-        color = data.map.symbcolor[data.level.background[i][j]];
-      if (data.level.background[i][j] in data.map.symbbngcolor)
-        bngcolor = data.map.symbbngcolor[data.level.background[i][j]];
+      color = data.map.symbcolor;
+      bngcolor = data.map.symbbngcolor;
         
       if (data.level.symb[i][j] in data.map.symb)
       {
@@ -698,8 +722,7 @@ function createMap(height)
   /*global object with scaling attribute*/
   var SVGmap =
     createSVGobject("g",
-                     {"id" : "map",
-                     "transform" : "scale("+height+")"});
+                     {"id" : "map"});
 
 
   simulation = createSimulation(data.program.start,data.program.content);
@@ -713,18 +736,17 @@ function createMap(height)
   SVGmap.appendChild(simulation["map"]);
 
   coordexec = computeCoord(newPt(10,0));
-  simulation["exec"].setAttributeNS(null, "transform", "translate("+coordexec.x+", "+coordexec.y+")");
+  simulation["exec"].setAttributeNS(null, "transform", "translate("+(coordexec.x-0.3)+", "+coordexec.y+")");
 
   SVGmap.appendChild(simulation["exec"]);
 
   var SVGcost =
     createSVGobject("g",
                      {"id" : "cost"});
-  simulation["cost"].setAttributeNS(null, "transform", "translate("+coordexec.x+", "+coordexec.y+")");
+  simulation["cost"].setAttributeNS(null, "transform", "translate("+(coordexec.x-0.3)+", "+coordexec.y+")");
   SVGmap.appendChild(simulation["cost"]);
 
   document.rootElement.appendChild(SVGmap);
-
 }
 
 function move()
