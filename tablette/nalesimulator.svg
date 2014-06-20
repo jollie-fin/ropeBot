@@ -3,7 +3,7 @@
 <!-- merci svground.fr -->
 <svg id="svgsim"
      preserveAspectRatio="xMidYMid slice"
-     viewBox="0 0 11 11"
+     viewBox="0 0 12 12"
      width="500px"
      height="500px"
      xml:lang="fr" xmlns="http://www.w3.org/2000/svg"
@@ -28,5 +28,6 @@
 <title>Simulation de la trajectoire de Nalé</title>
 <script xlink:href="generetableau.js"/>
 <script xlink:href="data.js"/>
+<script xlink:href="level.js"/>
 <!-- <script xlink:href="simulator.js"/>-->
 </svg>
