@@ -1,4 +1,109 @@
-Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = dim. 17 août 2014 22:45:41 CEST
+Cmp-Mod V01 Created by CvPcb (22-Jun-2014 BZR 4027)-stable date = dim. 17 août 2014 23:21:56 CEST
+
+BeginCmp
+TimeStamp = /53F17539;
+Reference = C1;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17548;
+Reference = C2;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17561;
+Reference = C3;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17570;
+Reference = C4;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F1757F;
+Reference = C5;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17598;
+Reference = C6;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175A7;
+Reference = C7;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175B6;
+Reference = C8;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175C5;
+Reference = C9;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175D4;
+Reference = C10;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175E3;
+Reference = C11;
+ValeurCmp = CP;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F175F2;
+Reference = C12;
+ValeurCmp = CP;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17601;
+Reference = C13;
+ValeurCmp = CP;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F17610;
+Reference = C14;
+ValeurCmp = CP;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /53F1761F;
+Reference = C15;
+ValeurCmp = CP;
+IdModule  = C1;
+EndCmp
 
 BeginCmp
 TimeStamp = /53F10B7C;
